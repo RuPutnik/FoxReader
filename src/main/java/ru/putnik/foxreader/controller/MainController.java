@@ -58,7 +58,7 @@ public class MainController extends Application implements Initializable {
         try {
             primaryStage.getIcons().add(new Image("icons/foxIcon.png"));
         }catch (IllegalArgumentException ex){
-            System.out.println("Не обнаружена иконка!");
+            System.out.println("Не обнаружена иконка программы!");
         }
         primaryStage.setResizable(false);
         primaryStage.show();
