@@ -107,12 +107,14 @@ public class MainController extends Application implements Initializable {
             if(modeRealSQLCheckBox.isSelected()){
                 textRequestTextField.setPromptText("Введите SQL запрос");
             }else{
-                textRequestTextField.setPromptText("Введите правило");
+                textRequestTextField.setPromptText("Введите фильтр");
             }
         });
         sendRequestButton.setOnAction(event->{
             if(modeRealSQLCheckBox.isSelected()){
                 mainModel.sendRequest(textRequestTextField.getText());
+            }else{
+                mainModel.sendFilter(textRequestTextField.getText());
             }
         });
     }

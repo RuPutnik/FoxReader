@@ -28,6 +28,8 @@ public class MainModel {
     private MainController mainController;
     private ConnectionProperty property;
     private String[] systemDBName={"master","msdb"};
+    private String selectedDB;
+    private String selectedTable;
     public MainModel(MainController controller){
         mainController=controller;
         try {
@@ -93,7 +95,8 @@ public class MainModel {
             PreparedStatement statement=connection.prepareStatement(request);
 
             fillTable(statement);
-
+            selectedDB=db;
+            selectedTable=nameTable;
             mainController.logRequestTextArea.appendText(request+"\n");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -177,13 +180,27 @@ public class MainModel {
     }
     public void sendRequest(String textReq){
         try {
-            fillTable(connection.prepareStatement(textReq));
+            if(!textReq.equals("")) {
+                fillTable(connection.prepareStatement(textReq));
+                mainController.logRequestTextArea.appendText(textReq + "\n");
+            }
         } catch (SQLException e) {
             Alert alert=new Alert(Alert.AlertType.INFORMATION);
             alert.setTitle("Ошибка выполнения запроса");
             alert.setHeaderText("При выполнении запроса возникла ошибка!");
             alert.setContentText(e.getLocalizedMessage()+"\n"+"Код ошибки: "+e.getErrorCode());
             alert.show();
+        }
+    }
+    public void sendFilter(String filter){
+        if(selectedDB!=null&&!selectedDB.equals("")&&!filter.equals("")){
+            String sqlReq;
+
+            sqlReq="USE "+selectedDB+";";
+            sqlReq=sqlReq+" SELECT * FROM ["+selectedTable+"] WHERE ";
+            sqlReq=sqlReq+filter;
+            sendRequest(sqlReq);
+            mainController.logRequestTextArea.appendText(sqlReq+"\n");
         }
     }
     private String getNameTableConnect(ConnectionProperty property){

@@ -39,7 +39,7 @@
             </HBox>
             <HBox alignment="CENTER" spacing="10">
                 <CheckBox fx:id="modeRealSQLCheckBox" text="Режим реального SQL" />
-                <TextField fx:id="textRequestTextField" minWidth="400" promptText="Введите правило" />
+                <TextField fx:id="textRequestTextField" minWidth="400" promptText="Введите фильтр" />
                 <Button fx:id="sendRequestButton" text="Обработать" />
             </HBox>
 
