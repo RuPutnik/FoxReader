@@ -71,6 +71,7 @@ public class MainController extends Application implements Initializable {
         logRequestTextArea.setStyle("-fx-text-fill: green");
         tableDBTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tableDBTableView.setTableMenuButtonVisible(true);
+        tableDBTableView.setContextMenu(assemblingContextMenu());
         connectionToServerMenuItem.setOnAction(event -> {
             property=connectionController.showView(stage);
             if(property!=null) {
@@ -124,6 +125,25 @@ public class MainController extends Application implements Initializable {
         Thread time=new Thread(timeRunnable);
         time.setDaemon(true);
         time.start();
+    }
+    private ContextMenu assemblingContextMenu(){
+        ContextMenu tableMenu=new ContextMenu();
+        MenuItem addRow=new MenuItem("Добавить запись");
+        MenuItem removeRow=new MenuItem("Удалить запись");
+
+        addRow.setDisable(true);
+        removeRow.setDisable(true);
+
+        addRow.setOnAction(event->{
+            mainModel.addRow();
+        });
+        removeRow.setOnAction(event -> {
+            mainModel.removeRow(tableDBTableView.getSelectionModel().getSelectedIndex());
+        });
+        tableMenu.getItems().add(addRow);
+        tableMenu.getItems().add(removeRow);
+
+        return tableMenu;
     }
     public static void play(){
         launch();

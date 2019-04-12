@@ -98,6 +98,8 @@ public class MainModel {
             selectedDB=db;
             selectedTable=nameTable;
             mainController.logRequestTextArea.appendText(request+"\n");
+            mainController.tableDBTableView.getContextMenu().getItems().get(0).setDisable(false);
+            mainController.tableDBTableView.getContextMenu().getItems().get(1).setDisable(false);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -213,5 +215,11 @@ public class MainModel {
             nameDB="";
         }
         return nameDB;
+    }
+    public void removeRow(int indexRow){
+
+    }
+    public void addRow(){
+
     }
 }
