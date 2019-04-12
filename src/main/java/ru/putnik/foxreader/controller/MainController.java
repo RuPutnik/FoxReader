@@ -1,18 +1,14 @@
 package ru.putnik.foxreader.controller;
 
 import javafx.application.Application;
-import javafx.application.Platform;
-import javafx.beans.value.ChangeListener;
-import javafx.beans.value.ObservableValue;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
-import javafx.scene.paint.Color;
+import javafx.scene.image.Image;
 import javafx.stage.Stage;
-import javafx.util.Callback;
 import ru.putnik.foxreader.ConnectionProperty;
 import ru.putnik.foxreader.TimeRunnable;
 import ru.putnik.foxreader.TypeTreeElement;
@@ -59,6 +55,11 @@ public class MainController extends Application implements Initializable {
         Scene scene=new Scene(parent);
         primaryStage.setScene(scene);
         primaryStage.setTitle("Fox reader v2.0");
+        try {
+            primaryStage.getIcons().add(new Image("icons/foxIcon.png"));
+        }catch (IllegalArgumentException ex){
+            System.out.println("Не обнаружена иконка!");
+        }
         primaryStage.setResizable(false);
         primaryStage.show();
     }

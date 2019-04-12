@@ -180,7 +180,7 @@ public class MainModel {
     }
     public void sendRequest(String textReq){
         try {
-            if(!textReq.equals("")) {
+            if(!textReq.trim().equals("")) {
                 fillTable(connection.prepareStatement(textReq));
                 mainController.logRequestTextArea.appendText(textReq + "\n");
             }
@@ -193,7 +193,7 @@ public class MainModel {
         }
     }
     public void sendFilter(String filter){
-        if(selectedDB!=null&&!selectedDB.equals("")&&!filter.equals("")){
+        if(selectedDB!=null&&!selectedDB.equals("")&&!filter.trim().equals("")){
             String sqlReq;
 
             sqlReq="USE "+selectedDB+";";
