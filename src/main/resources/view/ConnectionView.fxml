@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.geometry.Insets?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="ru.putnik.foxreader.controller.ConnectionController"
+      prefHeight="270.0" prefWidth="400.0"
+      alignment="CENTER"
+      spacing="10"
+            >
+    <Label text="Данные подключения"/>
+    <GridPane alignment="CENTER">
+        <columnConstraints>
+            <ColumnConstraints hgrow="SOMETIMES"/>
+            <ColumnConstraints hgrow="SOMETIMES"/>
+        </columnConstraints>
+        <rowConstraints>
+            <RowConstraints vgrow="SOMETIMES" prefHeight="30"/>
+            <RowConstraints vgrow="SOMETIMES" prefHeight="30"/>
+            <RowConstraints vgrow="SOMETIMES" prefHeight="30"/>
+            <RowConstraints vgrow="SOMETIMES" prefHeight="30"/>
+            <RowConstraints vgrow="SOMETIMES" prefHeight="30"/>
+        </rowConstraints>
+        <padding>
+            <Insets left="20" right="20" top="10" bottom="10"/>
+        </padding>
+
+        <Label text="Тип сервера" GridPane.columnIndex="0" GridPane.rowIndex="0"/>
+        <ComboBox minWidth="150" promptText="Выберите тип" GridPane.columnIndex="1" GridPane.rowIndex="0" fx:id="typeServerComboBox"/>
+        <Label text="Порт" GridPane.columnIndex="0" GridPane.rowIndex="1"/>
+        <TextField minWidth="50" GridPane.columnIndex="1" GridPane.rowIndex="1" fx:id="portTextField"/>
+        <Label text="Логин" GridPane.columnIndex="0" GridPane.rowIndex="2"/>
+        <TextField minWidth="150" GridPane.columnIndex="1" GridPane.rowIndex="2" fx:id="loginTextField"/>
+        <Label text="Пароль" GridPane.columnIndex="0" GridPane.rowIndex="3"/>
+        <TextField minWidth="150" GridPane.columnIndex="1" GridPane.rowIndex="3" fx:id="passwordTextField"/>
+        <Label text="Имя базы данных (опционально)" GridPane.columnIndex="0" GridPane.rowIndex="4"/>
+        <TextField minWidth="150" GridPane.columnIndex="1" GridPane.rowIndex="4" fx:id="nameDBTextField"/>
+    </GridPane>
+    <HBox spacing="10" alignment="CENTER">
+        <Button text="Подключиться" fx:id="connectToServerButton"/>
+        <Button text="Отмена" fx:id="cancelButton"/>
+        <Button text="Данные по умолчанию" fx:id="defaultDataButton"/>
+    </HBox>
+</VBox>
