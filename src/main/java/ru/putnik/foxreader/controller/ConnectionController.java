@@ -12,6 +12,7 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import ru.putnik.foxreader.ConnectionProperty;
@@ -29,6 +30,8 @@ public class ConnectionController implements Initializable {
     public TextField portTextField;
     @FXML
     public ComboBox<String> typeServerComboBox;
+    @FXML
+    public TextField addressServerTextField;
     @FXML
     public TextField loginTextField;
     @FXML
@@ -54,6 +57,11 @@ public class ConnectionController implements Initializable {
             stage.setTitle("Подключение к серверу");
             stage.initOwner(mainStage);
             stage.initModality(Modality.APPLICATION_MODAL);
+            try {
+                stage.getIcons().add(new Image("icons/foxIcon.png"));
+            }catch (IllegalArgumentException ex){
+                System.out.println("Не обнаружена иконка программы!");
+            }
             stage.showAndWait();
         } catch (IOException e) {
             e.printStackTrace();
@@ -69,6 +77,7 @@ public class ConnectionController implements Initializable {
         typeServerComboBox.setItems(typesServer);
         typeServerComboBox.setValue(typesServer.get(0));
         connectToServerButton.setOnAction(event -> {
+            String addressServer=addressServerTextField.getText();
             String login=loginTextField.getText();
             String password=passwordTextField.getText();
             String nameDB=nameDBTextField.getText();
@@ -85,7 +94,7 @@ public class ConnectionController implements Initializable {
                     alert.show();
                 }
 
-                property = new ConnectionProperty(typeServerComboBox.getValue(), login, password, nameDB, Integer.parseInt(port));
+                property = new ConnectionProperty(typeServerComboBox.getValue(),addressServer, login, password, nameDB, Integer.parseInt(port));
 
                 Node sourceNode = (Node) event.getSource();
                 Stage currentStage = (Stage) sourceNode.getScene().getWindow();
@@ -123,6 +132,7 @@ public class ConnectionController implements Initializable {
     }
     private void installDefaultSetting(){
         portTextField.setText("1433");
+        addressServerTextField.setText("localhost");
         loginTextField.setText("JavaConnect");
         passwordTextField.setText("123");
         typeServerComboBox.setValue(typeServerComboBox.getItems().get(0));

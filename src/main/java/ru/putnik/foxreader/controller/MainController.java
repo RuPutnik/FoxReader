@@ -9,6 +9,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.stage.Stage;
+
 import ru.putnik.foxreader.ConnectionProperty;
 import ru.putnik.foxreader.TimeRunnable;
 import ru.putnik.foxreader.TypeTreeElement;
@@ -16,9 +17,7 @@ import ru.putnik.foxreader.model.MainModel;
 
 import java.net.URL;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Objects;
-import java.util.ResourceBundle;
+import java.util.*;
 
 /**
  * Создано 09.04.2019 в 22:55
@@ -30,6 +29,7 @@ public class MainController extends Application implements Initializable {
     private ConnectionController connectionController=new ConnectionController();
     private ConnectionProperty property;
     private Stage stage;
+    private int indexRow;
 
     @FXML
     private MenuItem connectionToServerMenuItem;
@@ -40,14 +40,19 @@ public class MainController extends Application implements Initializable {
     @FXML
     public TextArea logRequestTextArea;
     @FXML
-    public TableView<List<Object>> tableDBTableView;
+    public TableView<List<String>> tableDBTableView;
     @FXML
     public CheckBox modeRealSQLCheckBox;
     @FXML
     public TextField textRequestTextField;
     @FXML
     public Button sendRequestButton;
-
+    @FXML
+    public MenuItem addRow;
+    @FXML
+    public MenuItem deleteRow;
+    @FXML
+    public MenuItem updateTable;
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.stage=primaryStage;
@@ -66,58 +71,83 @@ public class MainController extends Application implements Initializable {
 
     @Override
     public void initialize(URL location, ResourceBundle resources) {
-        mainModel=new MainModel(this);
+        mainModel = new MainModel(this);
         playTimer();
         logRequestTextArea.setStyle("-fx-text-fill: green");
-        tableDBTableView.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
         tableDBTableView.setTableMenuButtonVisible(true);
-        tableDBTableView.setContextMenu(assemblingContextMenu());
+        tableDBTableView.setEditable(true);
+
         connectionToServerMenuItem.setOnAction(event -> {
-            property=connectionController.showView(stage);
-            if(property!=null) {
+            property = connectionController.showView(stage);
+            if (property != null) {
                 try {
                     mainModel.initializeConnection(property);
-                    Alert alert=new Alert(Alert.AlertType.INFORMATION);
+                    Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Подключение установлено");
                     alert.setHeaderText("Подключение к серверу выполнено успешно!");
-                    alert.setContentText("Подключение с сервером "+property.getAddress()+" на порту "+property.getPort()+" было установлено.");
+                    alert.setContentText("Подключение с сервером " + property.getAddress() + " на порту " + property.getPort() + " было установлено.");
                     alert.show();
-                    logRequestTextArea.appendText("Success connection: "+property.createConnectionUrl()+"\n");
+                    logRequestTextArea.appendText("Success connection: " + property.createConnectionUrl() + "\n");
 
                     mainModel.fillTree();
 
-                }catch (SQLException e){
-                    Alert alert=new Alert(Alert.AlertType.ERROR);
+                } catch (SQLException e) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Ошибка подключения");
                     alert.setHeaderText("В процессе подключения возникла ошибка!");
-                    alert.setContentText(e.getLocalizedMessage()+"\n"+"Код ошибки: "+e.getErrorCode());
+                    alert.setContentText(e.getLocalizedMessage() + "\n" + "Код ошибки: " + e.getErrorCode());
                     alert.show();
-                    logRequestTextArea.appendText("Fail connection: "+property.createConnectionUrl()+"\n");
-                }finally {
+                    logRequestTextArea.appendText("Fail connection: " + property.createConnectionUrl() + "\n");
+                } finally {
                     logRequestTextArea.positionCaret(0);
                 }
             }
         });
         treeDBTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
-            if(newValue!=null) {
+            if (newValue != null) {
                 if (newValue.getValue().getType() == TypeTreeElement.Type.TABLE) {
-                    mainModel.firstFillTable(newValue.getValue().getName(), newValue.getValue().getNameDB(),newValue.getValue().getSchema());
+                    mainModel.firstFillTable(newValue.getValue().getName(), newValue.getValue().getNameDB(), newValue.getValue().getSchema());
+                    addRow.setDisable(false);
+                    deleteRow.setDisable(false);
+                    updateTable.setDisable(false);
                 }
             }
         });
         modeRealSQLCheckBox.setOnAction(event -> {
-            if(modeRealSQLCheckBox.isSelected()){
+            if (modeRealSQLCheckBox.isSelected()) {
                 textRequestTextField.setPromptText("Введите SQL запрос");
-            }else{
+            } else {
                 textRequestTextField.setPromptText("Введите фильтр");
             }
         });
-        sendRequestButton.setOnAction(event->{
-            if(modeRealSQLCheckBox.isSelected()){
-                mainModel.sendRequest(textRequestTextField.getText());
-            }else{
+        sendRequestButton.setOnAction(event -> {
+            if (modeRealSQLCheckBox.isSelected()) {
+                mainModel.sendRequest(textRequestTextField.getText(),mainModel.checkTypeRequest(textRequestTextField.getText()));
+            } else {
                 mainModel.sendFilter(textRequestTextField.getText());
             }
+        });
+        addRow.setDisable(true);
+        deleteRow.setDisable(true);
+        updateTable.setDisable(true);
+
+        addRow.setOnAction(event->{
+            mainModel.addRow();
+        });
+        deleteRow.setOnAction(event -> {
+            indexRow=tableDBTableView.getSelectionModel().getSelectedIndex();
+            if(indexRow==-1){
+                Alert alert=new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Ошибка удаления");
+                alert.setHeaderText("В процессе удаления строки возникла ошибка!");
+                alert.setContentText("Строка для удаления не выбрана");
+                alert.show();
+            }else {
+                mainModel.removeRow(indexRow);
+            }
+        });
+        updateTable.setOnAction(event -> {
+
         });
     }
     private void playTimer(){
@@ -125,25 +155,6 @@ public class MainController extends Application implements Initializable {
         Thread time=new Thread(timeRunnable);
         time.setDaemon(true);
         time.start();
-    }
-    private ContextMenu assemblingContextMenu(){
-        ContextMenu tableMenu=new ContextMenu();
-        MenuItem addRow=new MenuItem("Добавить запись");
-        MenuItem removeRow=new MenuItem("Удалить запись");
-
-        addRow.setDisable(true);
-        removeRow.setDisable(true);
-
-        addRow.setOnAction(event->{
-            mainModel.addRow();
-        });
-        removeRow.setOnAction(event -> {
-            mainModel.removeRow(tableDBTableView.getSelectionModel().getSelectedIndex());
-        });
-        tableMenu.getItems().add(addRow);
-        tableMenu.getItems().add(removeRow);
-
-        return tableMenu;
     }
     public static void play(){
         launch();

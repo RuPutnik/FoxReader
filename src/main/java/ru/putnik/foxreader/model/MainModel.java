@@ -1,13 +1,12 @@
 package ru.putnik.foxreader.model;
 
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.scene.control.Alert;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TreeItem;
-import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import ru.putnik.foxreader.ConnectionProperty;
@@ -16,6 +15,7 @@ import ru.putnik.foxreader.controller.MainController;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import static ru.putnik.foxreader.TypeTreeElement.Type;
@@ -30,6 +30,7 @@ public class MainModel {
     private String[] systemDBName={"master","msdb"};
     private String selectedDB;
     private String selectedTable;
+    private ArrayList<String> columnNames=new ArrayList<>();
     public MainModel(MainController controller){
         mainController=controller;
         try {
@@ -91,43 +92,63 @@ public class MainModel {
             if(set.next()) {
                 primaryKey=" ORDER BY "+set.getString("COLUMN_NAME");
             }
-            String request="USE "+db+" SELECT * FROM ["+nameTable+"]"+primaryKey;
+            String request="USE "+db+"; SELECT * FROM ["+nameTable+"]"+primaryKey+";";
             PreparedStatement statement=connection.prepareStatement(request);
 
             fillTable(statement);
             selectedDB=db;
             selectedTable=nameTable;
             mainController.logRequestTextArea.appendText(request+"\n");
-            mainController.tableDBTableView.getContextMenu().getItems().get(0).setDisable(false);
-            mainController.tableDBTableView.getContextMenu().getItems().get(1).setDisable(false);
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
     private void fillTable(PreparedStatement statement) throws SQLException{
-            ResultSet data=statement.executeQuery();
-            mainController.tableDBTableView.getColumns().clear();
-            ObservableList<List<Object>> listColumns = FXCollections.observableArrayList();
-            while (data.next()) {
-                List<Object> list = new ArrayList<>();
-                //Формируем данные (Список списков объектов)
-                for (int a = 0; a < data.getMetaData().getColumnCount(); a++) {
-
-                    list.add(data.getObject(a + 1));
-                }
-                listColumns.add(list);
-            }
+        ResultSet data=statement.executeQuery();
+        mainController.tableDBTableView.getColumns().clear();
+        columnNames.clear();
+        ObservableList<List<String>> listColumns = FXCollections.observableArrayList();
+        while (data.next()) {
+            List<String> list = new ArrayList<>();
+            //Формируем данные (Список списков объектов)
             for (int a = 0; a < data.getMetaData().getColumnCount(); a++) {
-                int b = a;
-                //Формируем столбец
-                TableColumn<List<Object>, Object> column = new TableColumn<>(statement.getMetaData().getColumnName(a + 1));
-                //Берем из общих данных отдельный список и загружаем его в столбец
-                column.setCellValueFactory(value -> new SimpleObjectProperty<>(value.getValue().get(b)));
-                //Загружаем столбец в таблицу
-                mainController.tableDBTableView.getColumns().add(column);
+                String valueCell=data.getString(a+1);
+                if(valueCell!=null){
+                    valueCell=valueCell.trim();
+                    if(valueCell.equals("")){
+                        valueCell="NULL";
+                    }
+                }
+                if(valueCell==null){
+                    valueCell="NULL";
+                }
+
+                list.add(valueCell);
             }
-            mainController.tableDBTableView.setItems(listColumns);//Загружаем данные в таблицу
+            listColumns.add(list);
+        }
+        for (int a = 0; a < data.getMetaData().getColumnCount(); a++) {
+            int b = a;
+            //Формируем столбец
+            ResultSetMetaData resultSetMetaData=statement.getMetaData();
+            TableColumn<List<String>, String> column = new TableColumn<>(resultSetMetaData.getColumnName(a + 1));
+            columnNames.add(resultSetMetaData.getColumnName(a+1));
+            //Берем из общих данных отдельный список и загружаем его в столбец
+            column.setCellValueFactory(value ->new SimpleObjectProperty<>(value.getValue().get(b)));
+            column.setEditable(true);
+            column.setComparator(new StringIntegerComparator());
+            //Либо этот вариант, либо самописные ячейки
+            column.setCellFactory(TextFieldTableCell.forTableColumn());
+
+            column.setOnEditCommit(event -> {
+                updateRow(event.getTablePosition().getColumn(),event.getNewValue(),event.getRowValue());
+            });
+            //Загружаем столбец в таблицу
+            mainController.tableDBTableView.getColumns().add(column);
+        }
+        mainController.tableDBTableView.setItems(listColumns);//Загружаем данные в таблицу
     }
+
     private void addingTablesInTree(TreeItem<TypeTreeElement> database){
         try {
             ResultSet tableResultSet = connection.getMetaData().getTables(null, null, null, null);
@@ -180,14 +201,66 @@ public class MainModel {
             e.printStackTrace();
         }
     }
-    public void sendRequest(String textReq){
+    private void updateRow(int columnIndex, String newValue, List<String> row){
+        ArrayList<String> newRow=new ArrayList<>(row);
+
+        StringBuilder reqUpdate= new StringBuilder("UPDATE " + selectedTable + " SET ");
+
+        if(newValue.toLowerCase().equals("null")){
+            reqUpdate.append(columnNames.get(columnIndex)).append("=").append(newValue);
+        }else {
+            try {
+                Integer.parseInt(newValue);
+                reqUpdate.append(columnNames.get(columnIndex)).append("=").append(newValue);
+            } catch (NumberFormatException e) {
+                reqUpdate.append(columnNames.get(columnIndex)).append("='").append(newValue).append("'");
+            }
+        }
+
+
+        reqUpdate.append(" WHERE ");
+
+        for(int a=0;a<columnNames.size();a++){
+            if(newRow.get(a)==null||newRow.get(a).toLowerCase().equals("null")){
+                reqUpdate.append(columnNames.get(a)).append(" IS NULL");
+            }else {
+                try {
+                    Integer.parseInt(newRow.get(a));
+                    reqUpdate.append(columnNames.get(a)).append("=").append(newRow.get(a));
+                } catch (NumberFormatException e) {
+                    reqUpdate.append(columnNames.get(a)).append("='").append(newRow.get(a)).append("'");
+                }
+            }
+            if(a<columnNames.size()-1){
+              reqUpdate.append(" AND ");
+            }
+        }
+        reqUpdate.append(";");
+        System.out.println(reqUpdate.toString());
+
+        sendRequest(reqUpdate.toString(),true);
+    }
+    public boolean checkTypeRequest(String req){
+        boolean isUpdate=false;
+
+        if(req.toLowerCase().contains("update")&&req.toLowerCase().contains("set")){
+            isUpdate=true;
+        }
+
+        return isUpdate;
+    }
+    public void sendRequest(String textReq, boolean updateDB){
         try {
             if(!textReq.trim().equals("")) {
-                fillTable(connection.prepareStatement(textReq));
+                if(updateDB) {
+                    connection.prepareStatement(textReq).executeUpdate();
+                }else {
+                    fillTable(connection.prepareStatement(textReq));
+                }
                 mainController.logRequestTextArea.appendText(textReq + "\n");
             }
         } catch (SQLException e) {
-            Alert alert=new Alert(Alert.AlertType.INFORMATION);
+            Alert alert=new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Ошибка выполнения запроса");
             alert.setHeaderText("При выполнении запроса возникла ошибка!");
             alert.setContentText(e.getLocalizedMessage()+"\n"+"Код ошибки: "+e.getErrorCode());
@@ -200,8 +273,8 @@ public class MainModel {
 
             sqlReq="USE "+selectedDB+";";
             sqlReq=sqlReq+" SELECT * FROM ["+selectedTable+"] WHERE ";
-            sqlReq=sqlReq+filter;
-            sendRequest(sqlReq);
+            sqlReq=sqlReq+filter+";";
+            sendRequest(sqlReq,false);
             mainController.logRequestTextArea.appendText(sqlReq+"\n");
         }
     }
@@ -221,5 +294,26 @@ public class MainModel {
     }
     public void addRow(){
 
+    }
+    private class StringIntegerComparator implements Comparator<String>{
+
+        @Override
+        public int compare(String o1, String o2) {
+
+            if (o1 == null && o2 == null) return 0;
+            if (o1 == null) return -1;
+            if (o2 == null) return 1;
+
+            Integer i1=null;
+            try{ i1=Integer.valueOf(o1); } catch(NumberFormatException ignored){}
+            Integer i2=null;
+            try{ i2=Integer.valueOf(o2); } catch(NumberFormatException ignored){}
+
+            if(i1==null && i2==null) return o1.compareTo(o2);
+            if(i1==null) return -1;
+            if(i2==null) return 1;
+
+            return i1-i2;
+        }
     }
 }

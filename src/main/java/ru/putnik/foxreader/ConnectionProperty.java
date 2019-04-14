@@ -12,10 +12,11 @@ public class ConnectionProperty {
     private String password;
     private String nameDB;
     private int port;
-    private String address="localhost";
+    private String address;
 
-    public ConnectionProperty(String typeServer,String login,String password,String nameDB,int port){
+    public ConnectionProperty(String typeServer,String address,String login,String password,String nameDB,int port){
         this.typeServer=typeServer;
+        this.address=address;
         this.login=login;
         this.password=password;
         this.nameDB=nameDB;
