@@ -59,7 +59,7 @@ public class MainController extends Application implements Initializable {
         Parent parent=FXMLLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource(PATH_FXML)));
         Scene scene=new Scene(parent);
         primaryStage.setScene(scene);
-        primaryStage.setTitle("Fox reader v2.0");
+        primaryStage.setTitle("FoxReader");
         try {
             primaryStage.getIcons().add(new Image("icons/foxIcon.png"));
         }catch (IllegalArgumentException ex){
@@ -147,7 +147,7 @@ public class MainController extends Application implements Initializable {
             }
         });
         updateTable.setOnAction(event -> {
-
+            mainModel.updateTable();
         });
     }
     private void playTimer(){

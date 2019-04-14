@@ -30,6 +30,7 @@ public class MainModel {
     private String[] systemDBName={"master","msdb"};
     private String selectedDB;
     private String selectedTable;
+    private String selectedSchema;
     private ArrayList<String> columnNames=new ArrayList<>();
     public MainModel(MainController controller){
         mainController=controller;
@@ -98,6 +99,7 @@ public class MainModel {
             fillTable(statement);
             selectedDB=db;
             selectedTable=nameTable;
+            selectedSchema=schema;
             mainController.logRequestTextArea.appendText(request+"\n");
         } catch (SQLException e) {
             e.printStackTrace();
@@ -294,6 +296,9 @@ public class MainModel {
     }
     public void addRow(){
 
+    }
+    public void updateTable(){
+        firstFillTable(selectedTable,selectedDB,selectedSchema);
     }
     private class StringIntegerComparator implements Comparator<String>{
 

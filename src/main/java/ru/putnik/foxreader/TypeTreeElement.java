@@ -11,7 +11,7 @@ public class TypeTreeElement {
 
     public TypeTreeElement(Type type, String name,String nameDB,String schema){
         this.type=type;
-        this.name = name;
+        this.name=name;
         this.nameDB=nameDB;
         this.schema=schema;
     }
@@ -38,6 +38,6 @@ public class TypeTreeElement {
     }
 
     public enum Type{
-        TABLE,CATALOG,DATABASE,SERVER
+        TABLE,CATALOG,DATABASE,SERVER,PRIMARY_KEY,FOREIGN_KEY,COLUMN,PROCEDURE
     }
 }
