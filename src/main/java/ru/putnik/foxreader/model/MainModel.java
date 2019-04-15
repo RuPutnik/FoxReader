@@ -32,6 +32,7 @@ public class MainModel {
     private String selectedTable;
     private String selectedSchema;
     private ArrayList<String> columnNames=new ArrayList<>();
+    private boolean useInsert=false;
     public MainModel(MainController controller){
         mainController=controller;
         try {
@@ -133,7 +134,8 @@ public class MainModel {
             int b = a;
             //Формируем столбец
             ResultSetMetaData resultSetMetaData=statement.getMetaData();
-            TableColumn<List<String>, String> column = new TableColumn<>(resultSetMetaData.getColumnName(a + 1));
+            TableColumn<List<String>, String> column =
+                    new TableColumn<>(resultSetMetaData.getColumnName(a + 1)+":"+resultSetMetaData.getColumnTypeName(a+1)+"  ");
             columnNames.add(resultSetMetaData.getColumnName(a+1));
             //Берем из общих данных отдельный список и загружаем его в столбец
             column.setCellValueFactory(value ->new SimpleObjectProperty<>(value.getValue().get(b)));
@@ -143,7 +145,14 @@ public class MainModel {
             column.setCellFactory(TextFieldTableCell.forTableColumn());
 
             column.setOnEditCommit(event -> {
-                updateRow(event.getTablePosition().getColumn(),event.getNewValue(),event.getRowValue());
+                if(!mainController.isSendCustomReq()) {
+                    if (useInsert) {
+                        useInsert = false;
+                        insertInto(event.getTablePosition().getColumn(), event.getNewValue());
+                    } else {
+                        updateRow(event.getTablePosition().getColumn(), event.getNewValue(), event.getRowValue());
+                    }
+                }
             });
             //Загружаем столбец в таблицу
             mainController.tableDBTableView.getColumns().add(column);
@@ -204,43 +213,46 @@ public class MainModel {
         }
     }
     private void updateRow(int columnIndex, String newValue, List<String> row){
-        ArrayList<String> newRow=new ArrayList<>(row);
+            ArrayList<String> newRow = new ArrayList<>(row);
 
-        StringBuilder reqUpdate= new StringBuilder("UPDATE " + selectedTable + " SET ");
+            StringBuilder reqUpdate = new StringBuilder("UPDATE " + selectedTable + " SET ");
 
-        if(newValue.toLowerCase().equals("null")){
-            reqUpdate.append(columnNames.get(columnIndex)).append("=").append(newValue);
-        }else {
-            try {
-                Integer.parseInt(newValue);
+            if (newValue.toLowerCase().equals("null")) {
                 reqUpdate.append(columnNames.get(columnIndex)).append("=").append(newValue);
-            } catch (NumberFormatException e) {
+            } else {
                 reqUpdate.append(columnNames.get(columnIndex)).append("='").append(newValue).append("'");
             }
-        }
 
 
-        reqUpdate.append(" WHERE ");
+            reqUpdate.append(" WHERE ");
 
-        for(int a=0;a<columnNames.size();a++){
-            if(newRow.get(a)==null||newRow.get(a).toLowerCase().equals("null")){
-                reqUpdate.append(columnNames.get(a)).append(" IS NULL");
-            }else {
-                try {
-                    Integer.parseInt(newRow.get(a));
-                    reqUpdate.append(columnNames.get(a)).append("=").append(newRow.get(a));
-                } catch (NumberFormatException e) {
+            for (int a = 0; a < columnNames.size(); a++) {
+                if (newRow.get(a).toLowerCase().equals("null") || newRow.get(a) == null) {
+                    reqUpdate.append(columnNames.get(a)).append(" IS NULL");
+                } else {
                     reqUpdate.append(columnNames.get(a)).append("='").append(newRow.get(a)).append("'");
                 }
+                if (a < columnNames.size() - 1) {
+                    reqUpdate.append(" AND ");
+                }
             }
-            if(a<columnNames.size()-1){
-              reqUpdate.append(" AND ");
-            }
-        }
-        reqUpdate.append(";");
-        System.out.println(reqUpdate.toString());
+            reqUpdate.append(";");
 
-        sendRequest(reqUpdate.toString(),true);
+            sendRequest(reqUpdate.toString(), true);
+
+    }
+    private void insertInto(int columnIndex, String newValue){
+        StringBuilder reqInsert = new StringBuilder("INSERT INTO " + selectedTable + "(");
+
+        reqInsert.append(columnNames.get(columnIndex));
+        reqInsert.append(") VALUES(");
+        if(newValue.toLowerCase().equals("null")) {
+            reqInsert.append(newValue);
+        }else {
+            reqInsert.append("'").append(newValue).append("'");
+        }
+        reqInsert.append(");");
+        sendRequest(reqInsert.toString(),true);
     }
     public boolean checkTypeRequest(String req){
         boolean isUpdate=false;
@@ -256,8 +268,10 @@ public class MainModel {
             if(!textReq.trim().equals("")) {
                 if(updateDB) {
                     connection.prepareStatement(textReq).executeUpdate();
+                    updateTable();
                 }else {
                     fillTable(connection.prepareStatement(textReq));
+
                 }
                 mainController.logRequestTextArea.appendText(textReq + "\n");
             }
@@ -267,6 +281,10 @@ public class MainModel {
             alert.setHeaderText("При выполнении запроса возникла ошибка!");
             alert.setContentText(e.getLocalizedMessage()+"\n"+"Код ошибки: "+e.getErrorCode());
             alert.show();
+
+            if(updateDB){
+                updateTable();//Если будет ошибка, данные в графичиской части должны откатиться к реальным
+            }
         }
     }
     public void sendFilter(String filter){
@@ -292,16 +310,42 @@ public class MainModel {
         return nameDB;
     }
     public void removeRow(int indexRow){
+        List<String> row=mainController.tableDBTableView.getItems().get(indexRow);
+        StringBuilder builderDeleteReq=new StringBuilder();
+        builderDeleteReq.append("DELETE FROM ");
+        builderDeleteReq.append(selectedTable);
+        builderDeleteReq.append(" WHERE ");
 
+        for(int a=0;a<columnNames.size();a++){
+            if(row.get(a)==null||row.get(a).toLowerCase().equals("null")){
+                builderDeleteReq.append(columnNames.get(a)).append(" IS NULL");
+            }else {
+                builderDeleteReq.append(columnNames.get(a)).append("='").append(row.get(a)).append("'");
+            }
+            if(a<columnNames.size()-1){
+                builderDeleteReq.append(" AND ");
+            }
+        }
+        builderDeleteReq.append(";");
+        sendRequest(builderDeleteReq.toString(),true);
+    }
+    public void deleteAllRows(){
+        String sqlReq;
+        sqlReq="TRUNCATE TABLE "+selectedTable+";";
+        sendRequest(sqlReq,true);
     }
     public void addRow(){
-
+        ArrayList<String> newRow=new ArrayList<>();
+        for (int a=0;a<columnNames.size();a++){
+            newRow.add("NULL");
+        }
+        mainController.tableDBTableView.getItems().add(newRow);
+        useInsert=true;
     }
     public void updateTable(){
         firstFillTable(selectedTable,selectedDB,selectedSchema);
     }
     private class StringIntegerComparator implements Comparator<String>{
-
         @Override
         public int compare(String o1, String o2) {
 
@@ -309,16 +353,24 @@ public class MainModel {
             if (o1 == null) return -1;
             if (o2 == null) return 1;
 
-            Integer i1=null;
-            try{ i1=Integer.valueOf(o1); } catch(NumberFormatException ignored){}
-            Integer i2=null;
-            try{ i2=Integer.valueOf(o2); } catch(NumberFormatException ignored){}
+            Double i1=null;
+            try{ i1=Double.valueOf(o1); } catch(NumberFormatException ignored){}
+            Double i2=null;
+            try{ i2=Double.valueOf(o2); } catch(NumberFormatException ignored){}
 
             if(i1==null && i2==null) return o1.compareTo(o2);
             if(i1==null) return -1;
             if(i2==null) return 1;
 
-            return i1-i2;
+            double c=i1-i2;
+
+            if(c<0){
+                return -1;
+            }else if(c==0) {
+                return 0;
+            }else{
+                return 1;
+            }
         }
     }
 }

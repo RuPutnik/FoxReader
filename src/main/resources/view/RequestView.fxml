@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+<?import org.fxmisc.richtext.CodeArea?>
+
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.putnik.foxreader.controller.RequestController">
+   <children>
+      <CodeArea fx:id="sqlReqArea" prefHeight="351.0" prefWidth="600.0" />
+      <HBox alignment="CENTER" prefHeight="90.0" prefWidth="600.0" spacing="10.0">
+         <children>
+            <Button fx:id="handleRequestButton" text="Обработать" />
+            <Button fx:id="clearArea" text="Очистить" />
+            <Button fx:id="handleAndCloseButton" text="Обработать и закрыть" />
+            <Button fx:id="saveButton" text="Сохранить" />
+            <Button fx:id="notSaveButton" text="Не сохранять" />
+         </children>
+      </HBox>
+   </children>
+</VBox>

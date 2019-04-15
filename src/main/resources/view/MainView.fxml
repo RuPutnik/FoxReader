@@ -44,9 +44,10 @@
                                 <contextMenu>
                                     <ContextMenu>
                                         <items>
-                                            <MenuItem fx:id="updateTable" text="Обновить таблицу" />
-                                            <MenuItem fx:id="addRow" text="Добавить запись" />
-                                            <MenuItem fx:id="deleteRow" text="Удалить запись" />
+                                            <MenuItem fx:id="updateTable" text="Обновить таблицу" disable="true"/>
+                                            <MenuItem fx:id="addRow" text="Добавить запись" disable="true"/>
+                                            <MenuItem fx:id="deleteRow" text="Удалить запись" disable="true"/>
+                                            <MenuItem fx:id="deleteAllRows" text="Удалить все записи" disable="true"/>
                                         </items>
                                     </ContextMenu>
                                 </contextMenu>

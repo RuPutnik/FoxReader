@@ -27,9 +27,11 @@ public class MainController extends Application implements Initializable {
 
     private MainModel mainModel;
     private ConnectionController connectionController=new ConnectionController();
+    private RequestController requestController=new RequestController();
     private ConnectionProperty property;
-    private Stage stage;
+    private static Stage stage;
     private int indexRow;
+    private boolean sendCustomReq=false;
 
     @FXML
     private MenuItem connectionToServerMenuItem;
@@ -48,11 +50,15 @@ public class MainController extends Application implements Initializable {
     @FXML
     public Button sendRequestButton;
     @FXML
+    public Button editInWindow;//Создать новое окно в котором будет RichTextArea, а здесь останется обычный TextField - для небольшого запроса
+    @FXML
     public MenuItem addRow;
     @FXML
     public MenuItem deleteRow;
     @FXML
     public MenuItem updateTable;
+    @FXML
+    public MenuItem deleteAllRows;
     @Override
     public void start(Stage primaryStage) throws Exception {
         this.stage=primaryStage;
@@ -110,6 +116,7 @@ public class MainController extends Application implements Initializable {
                     addRow.setDisable(false);
                     deleteRow.setDisable(false);
                     updateTable.setDisable(false);
+                    deleteAllRows.setDisable(false);
                 }
             }
         });
@@ -126,11 +133,22 @@ public class MainController extends Application implements Initializable {
             } else {
                 mainModel.sendFilter(textRequestTextField.getText());
             }
+            deleteRow.setDisable(true);
+            addRow.setDisable(true);
+            deleteAllRows.setDisable(true);
+            sendCustomReq=true;
         });
-        addRow.setDisable(true);
-        deleteRow.setDisable(true);
-        updateTable.setDisable(true);
-
+        editInWindow.setOnAction(event -> {
+            //Если открыто окно для работы с запросом, запрещено как то изменять его на главном окне
+            textRequestTextField.setEditable(false);
+            modeRealSQLCheckBox.setDisable(true);
+            sendRequestButton.setDisable(true);
+            textRequestTextField.setText(requestController.showView(textRequestTextField.getText()));
+            //Когда окно для работы с запросом закрыто, снова разрешена работа на главном окне
+            textRequestTextField.setEditable(true);
+            modeRealSQLCheckBox.setDisable(false);
+            sendRequestButton.setDisable(false);
+        });
         addRow.setOnAction(event->{
             mainModel.addRow();
         });
@@ -148,6 +166,16 @@ public class MainController extends Application implements Initializable {
         });
         updateTable.setOnAction(event -> {
             mainModel.updateTable();
+            deleteRow.setDisable(false);
+            addRow.setDisable(false);
+            deleteAllRows.setDisable(false);
+            sendCustomReq=false;
+        });
+        deleteAllRows.setOnAction(event -> {
+            mainModel.deleteAllRows();
+        });
+        stage.setOnCloseRequest(event -> {
+            System.exit(0);
         });
     }
     private void playTimer(){
@@ -156,6 +184,11 @@ public class MainController extends Application implements Initializable {
         time.setDaemon(true);
         time.start();
     }
+
+    public boolean isSendCustomReq() {
+        return sendCustomReq;
+    }
+
     public static void play(){
         launch();
     }
