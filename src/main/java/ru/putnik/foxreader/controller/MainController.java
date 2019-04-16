@@ -8,6 +8,7 @@ import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 import ru.putnik.foxreader.ConnectionProperty;
@@ -24,6 +25,8 @@ import java.util.*;
  */
 public class MainController extends Application implements Initializable {
     private static final String PATH_FXML= "view/MainView.fxml";
+
+
 
     private MainModel mainModel;
     private ConnectionController connectionController=new ConnectionController();
@@ -60,9 +63,36 @@ public class MainController extends Application implements Initializable {
     public MenuItem updateTable;
     @FXML
     public MenuItem deleteAllRows;
+    @FXML
+    public GridPane rowGridPane;
+    @FXML
+    public Button saveRowButton;
+    @FXML
+    public Button addRowButton;
+    @FXML
+    public Button deleteRowButton;
+    @FXML
+    public Button updateButton;
+    @FXML
+    public Button deleteAllRowButton;
+    @FXML
+    public Button firstRowButton;
+    @FXML
+    public Button lastRowButton;
+    @FXML
+    public Button nextRowButton;
+    @FXML
+    public Button backRowButton;
+    @FXML
+    public Label countAllRowLabel;
+    @FXML
+    public TextField numberRowTextField;
+    @FXML
+    public Button goToRowButton;
+
     @Override
     public void start(Stage primaryStage) throws Exception {
-        this.stage=primaryStage;
+        stage=primaryStage;
         Parent parent=FXMLLoader.load(Objects.requireNonNull(getClass().getClassLoader().getResource(PATH_FXML)));
         Scene scene=new Scene(parent);
         primaryStage.setScene(scene);
@@ -84,9 +114,6 @@ public class MainController extends Application implements Initializable {
         tableDBTableView.setTableMenuButtonVisible(true);
         tableDBTableView.setEditable(true);
         textRequestTextField.setEditable(false);
-        modeRealSQLCheckBox.setDisable(true);
-        sendRequestButton.setDisable(true);
-        editInWindowButton.setDisable(true);
 
         connectionToServerMenuItem.setOnAction(event -> {
             property = connectionController.showView(stage);
@@ -97,6 +124,7 @@ public class MainController extends Application implements Initializable {
                     alert.setTitle("Подключение установлено");
                     alert.setHeaderText("Подключение к серверу выполнено успешно!");
                     alert.setContentText("Подключение с сервером " + property.getAddress() + " на порту " + property.getPort() + " было установлено.");
+                    ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
                     alert.show();
                     logRequestTextArea.appendText("Success connection: " + property.createConnectionUrl() + "\n");
 
@@ -111,6 +139,7 @@ public class MainController extends Application implements Initializable {
                     alert.setTitle("Ошибка подключения");
                     alert.setHeaderText("В процессе подключения возникла ошибка!");
                     alert.setContentText(e.getLocalizedMessage() + "\n" + "Код ошибки: " + e.getErrorCode());
+                    ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
                     alert.show();
                     logRequestTextArea.appendText("Fail connection: " + property.createConnectionUrl() + "\n");
                 } finally {
@@ -126,6 +155,18 @@ public class MainController extends Application implements Initializable {
                     deleteRow.setDisable(false);
                     updateTable.setDisable(false);
                     deleteAllRows.setDisable(false);
+
+                    saveRowButton.setDisable(false);
+                    addRowButton.setDisable(false);
+                    deleteRowButton.setDisable(false);
+                    deleteAllRowButton.setDisable(false);
+                    updateButton.setDisable(false);
+                    lastRowButton.setDisable(false);
+                    firstRowButton.setDisable(false);
+                    nextRowButton.setDisable(false);
+                    backRowButton.setDisable(false);
+                    goToRowButton.setDisable(false);
+                    numberRowTextField.setDisable(false);
                 }
             }
         });
@@ -162,7 +203,9 @@ public class MainController extends Application implements Initializable {
                 alert.setTitle("Ошибка удаления");
                 alert.setHeaderText("В процессе удаления строки возникла ошибка!");
                 alert.setContentText("Строка для удаления не выбрана");
+                ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
                 alert.show();
+
             }else {
                 mainModel.removeRow(indexRow);
             }
@@ -176,6 +219,30 @@ public class MainController extends Application implements Initializable {
         });
         deleteAllRows.setOnAction(event -> {
             mainModel.deleteAllRows();
+        });
+        saveRowButton.setOnAction(event -> {
+
+        });
+        deleteRowButton.setOnAction(event -> {
+
+        });
+        deleteAllRowButton.setOnAction(event -> {
+
+        });
+        updateButton.setOnAction(event -> {
+
+        });
+        firstRowButton.setOnAction(event -> {
+
+        });
+        lastRowButton.setOnAction(event -> {
+
+        });
+        nextRowButton.setOnAction(event -> {
+
+        });
+        backRowButton.setOnAction(event -> {
+
         });
         stage.setOnCloseRequest(event -> {
             System.exit(0);

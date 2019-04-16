@@ -8,6 +8,7 @@
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
+<?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableView?>
@@ -15,7 +16,10 @@
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.ColumnConstraints?>
+<?import javafx.scene.layout.GridPane?>
 <?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
 <BorderPane prefHeight="550.0" prefWidth="850.0" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.putnik.foxreader.controller.MainController">
@@ -44,26 +48,66 @@
                                 <contextMenu>
                                     <ContextMenu>
                                         <items>
-                                            <MenuItem fx:id="updateTable" text="Обновить таблицу" disable="true"/>
-                                            <MenuItem fx:id="addRow" text="Добавить запись" disable="true"/>
-                                            <MenuItem fx:id="deleteRow" text="Удалить запись" disable="true"/>
-                                            <MenuItem fx:id="deleteAllRows" text="Удалить все записи" disable="true"/>
+                                            <MenuItem fx:id="updateTable" disable="true" text="Обновить таблицу" />
+                                            <MenuItem fx:id="addRow" disable="true" text="Добавить запись" />
+                                            <MenuItem fx:id="deleteRow" disable="true" text="Удалить запись" />
+                                            <MenuItem fx:id="deleteAllRows" disable="true" text="Удалить все записи" />
                                         </items>
                                     </ContextMenu>
                                 </contextMenu>
                             </TableView>
                         </Tab>
                         <Tab closable="false" text="Ленточный вид">
-
+                            <VBox spacing="10">
+                                <HBox alignment="CENTER_RIGHT" spacing="10">
+                                    <Label text="Количество записей: " fx:id="countAllRowLabel"/>
+                                    <TextField promptText="Введите номер записи" disable="true" fx:id="numberRowTextField"/>
+                                    <Button text="Перейти" disable="true" fx:id="goToRowButton"/>
+                                    <padding>
+                                        <Insets top="5" right="5"/>
+                                    </padding>
+                                </HBox>
+                                <ScrollPane prefHeight="333.0" prefWidth="609.0">
+                                    <GridPane fx:id="rowGridPane" />
+                                </ScrollPane>
+                                <HBox alignment="BOTTOM_CENTER" prefHeight="102.0" prefWidth="609.0" style=" -fx-border-color:lightgray; -fx-border-width: 1; -fx-border-style: solid; -fx-border-radius: 10;">
+                                    <GridPane alignment="CENTER" hgap="10" vgap="10">
+                                        <columnConstraints>
+                                            <ColumnConstraints />
+                                            <ColumnConstraints />
+                                            <ColumnConstraints />
+                                            <ColumnConstraints />
+                                            <ColumnConstraints />
+                                        </columnConstraints>
+                                        <rowConstraints>
+                                            <RowConstraints />
+                                            <RowConstraints />
+                                        </rowConstraints>
+                                        <padding>
+                                            <Insets bottom="10" left="20" right="20" top="10" />
+                                        </padding>
+                                        <Button fx:id="saveRowButton" disable="true" prefWidth="88.0" text="Сохранить" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                        <Button fx:id="deleteRowButton" disable="true" prefWidth="88.0" text="Удалить" GridPane.columnIndex="0" GridPane.rowIndex="1" />
+                                        <Button fx:id="addRowButton" disable="true" prefWidth="88.0" text="Добавить" GridPane.columnIndex="1" GridPane.rowIndex="0" />
+                                        <Button fx:id="updateButton" disable="true" prefWidth="88.0" text="Обновить" GridPane.columnIndex="1" GridPane.rowIndex="1" />
+                                        <Button fx:id="deleteAllRowButton" disable="true" prefWidth="88.0" text="Удалить все" GridPane.columnIndex="2" GridPane.rowIndex="0" />
+                                        <Label alignment="CENTER" contentDisplay="CENTER" prefWidth="88.0" text="Управление" GridPane.columnIndex="2" GridPane.rowIndex="1" />
+                                        <Button fx:id="firstRowButton" disable="true" prefWidth="88.0" text="Первая" GridPane.columnIndex="3" GridPane.rowIndex="0" />
+                                        <Button fx:id="lastRowButton" disable="true" prefWidth="88.0" text="Последняя" GridPane.columnIndex="3" GridPane.rowIndex="1" />
+                                        <Button fx:id="nextRowButton" disable="true" prefWidth="88.0" text="Следующая" GridPane.columnIndex="4" GridPane.rowIndex="0" />
+                                        <Button fx:id="backRowButton" disable="true" text="Предыдущая" GridPane.columnIndex="4" GridPane.rowIndex="1" />
+                                    </GridPane>
+                                </HBox>
+                            </VBox>
                         </Tab>
                     </tabs>
                 </TabPane>
             </HBox>
             <HBox alignment="CENTER" spacing="10">
-                <CheckBox fx:id="modeRealSQLCheckBox" text="Режим реального SQL" />
+                <CheckBox fx:id="modeRealSQLCheckBox" text="Режим реального SQL" disable="true"/>
                 <TextField fx:id="textRequestTextField" minWidth="400" promptText="Введите фильтр" />
-                <Button fx:id="sendRequestButton" text="Обработать" />
-                <Button fx:id="editInWindowButton" text="Ввести в окне" />
+                <Button fx:id="sendRequestButton" text="Обработать" disable="true"/>
+                <Button fx:id="editInWindowButton" text="Ввести в окне" disable="true"/>
             </HBox>
 
             <padding>

@@ -91,7 +91,9 @@ public class ConnectionController implements Initializable {
                     alert.setTitle("Ошибка подключения");
                     alert.setHeaderText("Ошибка при указании порта");
                     alert.setContentText("Номер порта должен быть целым числом");
+                    ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
                     alert.show();
+
                 }
 
                 property = new ConnectionProperty(typeServerComboBox.getValue(),addressServer, login, password, nameDB, Integer.parseInt(port));

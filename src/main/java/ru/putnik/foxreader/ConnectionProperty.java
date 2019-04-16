@@ -1,6 +1,8 @@
 package ru.putnik.foxreader;
 
 import javafx.scene.control.Alert;
+import javafx.scene.image.Image;
+import javafx.stage.Stage;
 
 /**
  * Создано 10.04.2019 в 0:16
@@ -27,10 +29,11 @@ public class ConnectionProperty {
         }else if(typeServer.equals("Oracle MySQL")){
             patternConnection="jdbc:mysql:";
         }else{
-            Alert alert=new Alert(Alert.AlertType.WARNING);
+            Alert alert=new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Ошибка подключения");
             alert.setHeaderText("Не установлен протокол подключения");
             alert.setContentText("Для данного типа сервера не удалось найти протокол подключения. Подключение недоступно.");
+            ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
             alert.show();
         }
     }

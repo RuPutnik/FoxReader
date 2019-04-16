@@ -9,6 +9,7 @@ import javafx.scene.control.TreeItem;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.stage.Stage;
 import ru.putnik.foxreader.ConnectionProperty;
 import ru.putnik.foxreader.TypeTreeElement;
 import ru.putnik.foxreader.controller.MainController;
@@ -286,6 +287,7 @@ public class MainModel {
             alert.setHeaderText("При выполнении запроса возникла ошибка!");
             alert.setContentText(e.getLocalizedMessage()+"\n"+"Код ошибки: "+e.getErrorCode());
             alert.show();
+            ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
 
             if(updateDB){
                 updateTable();//Если будет ошибка, данные в графичиской части должны откатиться к реальным
