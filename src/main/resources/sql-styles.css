@@ -1,0 +1,24 @@
+.keyword {
+    -fx-fill: blue;
+}
+.names {
+    -fx-fill: brown;
+}
+.paren {
+    -fx-fill: gray;
+}
+.brace {
+    -fx-fill: gray;
+}
+.signs {
+    -fx-fill: gray;
+}
+.semicolon {
+    -fx-fill: gray;
+}
+.string {
+    -fx-fill: red;
+}
+.comment {
+    -fx-fill: green;
+}

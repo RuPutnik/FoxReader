@@ -5,9 +5,15 @@
 <?import javafx.scene.layout.VBox?>
 <?import org.fxmisc.richtext.CodeArea?>
 
-<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.putnik.foxreader.controller.RequestController">
+<?import org.fxmisc.flowless.VirtualizedScrollPane?>
+<VBox alignment="CENTER" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0"
+      prefWidth="600.0" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.putnik.foxreader.controller.RequestController">
    <children>
-      <CodeArea fx:id="sqlReqArea" prefHeight="351.0" prefWidth="600.0" />
+      <VirtualizedScrollPane>
+         <content>
+            <CodeArea fx:id="sqlReqArea" prefHeight="351.0" prefWidth="600.0"/>
+         </content>
+      </VirtualizedScrollPane>
       <HBox alignment="CENTER" prefHeight="90.0" prefWidth="600.0" spacing="10.0">
          <children>
             <Button fx:id="handleRequestButton" text="Обработать" />

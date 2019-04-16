@@ -27,11 +27,12 @@ public class MainController extends Application implements Initializable {
 
     private MainModel mainModel;
     private ConnectionController connectionController=new ConnectionController();
-    private RequestController requestController=new RequestController();
+    private RequestController requestController;
     private ConnectionProperty property;
     private static Stage stage;
     private int indexRow;
     private boolean sendCustomReq=false;
+    private static ArrayList<String> allNames=new ArrayList<>();
 
     @FXML
     private MenuItem connectionToServerMenuItem;
@@ -50,7 +51,7 @@ public class MainController extends Application implements Initializable {
     @FXML
     public Button sendRequestButton;
     @FXML
-    public Button editInWindow;//Создать новое окно в котором будет RichTextArea, а здесь останется обычный TextField - для небольшого запроса
+    public Button editInWindowButton;
     @FXML
     public MenuItem addRow;
     @FXML
@@ -82,6 +83,10 @@ public class MainController extends Application implements Initializable {
         logRequestTextArea.setStyle("-fx-text-fill: green");
         tableDBTableView.setTableMenuButtonVisible(true);
         tableDBTableView.setEditable(true);
+        textRequestTextField.setEditable(false);
+        modeRealSQLCheckBox.setDisable(true);
+        sendRequestButton.setDisable(true);
+        editInWindowButton.setDisable(true);
 
         connectionToServerMenuItem.setOnAction(event -> {
             property = connectionController.showView(stage);
@@ -97,6 +102,10 @@ public class MainController extends Application implements Initializable {
 
                     mainModel.fillTree();
 
+                    textRequestTextField.setEditable(true);
+                    modeRealSQLCheckBox.setDisable(false);
+                    sendRequestButton.setDisable(false);
+                    editInWindowButton.setDisable(false);
                 } catch (SQLException e) {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Ошибка подключения");
@@ -128,22 +137,16 @@ public class MainController extends Application implements Initializable {
             }
         });
         sendRequestButton.setOnAction(event -> {
-            if (modeRealSQLCheckBox.isSelected()) {
-                mainModel.sendRequest(textRequestTextField.getText(),mainModel.checkTypeRequest(textRequestTextField.getText()));
-            } else {
-                mainModel.sendFilter(textRequestTextField.getText());
-            }
-            deleteRow.setDisable(true);
-            addRow.setDisable(true);
-            deleteAllRows.setDisable(true);
-            sendCustomReq=true;
+            sendRequest(textRequestTextField.getText());
         });
-        editInWindow.setOnAction(event -> {
+        editInWindowButton.setOnAction(event -> {
+            requestController=new RequestController(allNames);
             //Если открыто окно для работы с запросом, запрещено как то изменять его на главном окне
             textRequestTextField.setEditable(false);
             modeRealSQLCheckBox.setDisable(true);
             sendRequestButton.setDisable(true);
-            textRequestTextField.setText(requestController.showView(textRequestTextField.getText()));
+            String text=requestController.showView(this,textRequestTextField.getText());
+            textRequestTextField.setText(text);
             //Когда окно для работы с запросом закрыто, снова разрешена работа на главном окне
             textRequestTextField.setEditable(true);
             modeRealSQLCheckBox.setDisable(false);
@@ -184,12 +187,26 @@ public class MainController extends Application implements Initializable {
         time.setDaemon(true);
         time.start();
     }
-
+    public void sendRequest(String textReq){
+        if (modeRealSQLCheckBox.isSelected()) {
+            mainModel.sendRequest(textReq,mainModel.checkTypeRequest(textReq));
+        } else {
+            mainModel.sendFilter(textReq);
+        }
+        deleteRow.setDisable(true);
+        addRow.setDisable(true);
+        deleteAllRows.setDisable(true);
+        sendCustomReq=true;
+    }
     public boolean isSendCustomReq() {
         return sendCustomReq;
     }
 
     public static void play(){
         launch();
+    }
+
+    public ArrayList<String> getAllNames() {
+        return allNames;
     }
 }

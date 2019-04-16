@@ -63,7 +63,7 @@
                 <CheckBox fx:id="modeRealSQLCheckBox" text="Режим реального SQL" />
                 <TextField fx:id="textRequestTextField" minWidth="400" promptText="Введите фильтр" />
                 <Button fx:id="sendRequestButton" text="Обработать" />
-                <Button fx:id="editInWindow" text="Ввести в окне" />
+                <Button fx:id="editInWindowButton" text="Ввести в окне" />
             </HBox>
 
             <padding>

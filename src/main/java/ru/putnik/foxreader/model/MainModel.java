@@ -64,12 +64,14 @@ public class MainModel {
                     ResultSet dbResultSet = connection.getMetaData().getCatalogs();
                     while (dbResultSet.next()) {
                         TreeItem<TypeTreeElement> database = new TreeItem<>();
+
                         database.setValue(new TypeTreeElement(Type.DATABASE,dbResultSet.getString(1),dbResultSet.getString(1),null));
                         database.setGraphic(new ImageView(new Image("icons/base.jpg")));
                         connection.setCatalog(database.getValue().getName());
                         addingTablesInTree(database);
 
                         rootItem.getChildren().add(database);
+                        mainController.getAllNames().add(dbResultSet.getString(1).toLowerCase());
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
@@ -80,6 +82,7 @@ public class MainModel {
                 database.setGraphic(new ImageView(new Image("icons/base.jpg")));
                 addingTablesInTree(database);
                 rootItem.getChildren().add(database);
+                mainController.getAllNames().add(getNameTableConnect(property).toLowerCase());
             }
 
             rootItem.setExpanded(true);
@@ -137,6 +140,7 @@ public class MainModel {
             TableColumn<List<String>, String> column =
                     new TableColumn<>(resultSetMetaData.getColumnName(a + 1)+":"+resultSetMetaData.getColumnTypeName(a+1)+"  ");
             columnNames.add(resultSetMetaData.getColumnName(a+1));
+            mainController.getAllNames().add(resultSetMetaData.getColumnName(a+1).toLowerCase());
             //Берем из общих данных отдельный список и загружаем его в столбец
             column.setCellValueFactory(value ->new SimpleObjectProperty<>(value.getValue().get(b)));
             column.setEditable(true);
@@ -181,19 +185,20 @@ public class MainModel {
 
                         TreeItem<TypeTreeElement> table = new TreeItem<>();
                         table.setValue(new TypeTreeElement(Type.TABLE,tableResultSet.getString("TABLE_NAME"),connection.getCatalog(),tableResultSet.getString("TABLE_SCHEM")));
-
                         table.setGraphic(new ImageView(new Image("icons/table.jpg")));
                         if (tableResultSet.getString("TABLE_NAME").equals("sysdiagrams")) {
                             database.getChildren().get(0).getChildren().add(table);
                         } else {
                             database.getChildren().add(table);
                         }
+                        mainController.getAllNames().add(tableResultSet.getString("TABLE_NAME").toLowerCase());
                     }
                     if (tableResultSet.getString("TABLE_TYPE").equals("SYSTEM TABLE")) {
                         TreeItem<TypeTreeElement> table = new TreeItem<>();
                         table.setValue(new TypeTreeElement(Type.TABLE,tableResultSet.getString("TABLE_NAME"),connection.getCatalog(),tableResultSet.getString("TABLE_SCHEM")));
                         table.setGraphic(new ImageView(new Image("icons/table.jpg")));
                         database.getChildren().get(0).getChildren().add(table);
+                        mainController.getAllNames().add(tableResultSet.getString("TABLE_NAME").toLowerCase());
                     }
                 }
             }else{
