@@ -91,6 +91,8 @@ public class MainController extends Application implements Initializable {
     public TextField numberRowTextField;
     @FXML
     public Button goToRowButton;
+    @FXML
+    public ScrollPane scrollPane;
 
     @Override
     public void start(Stage primaryStage) throws Exception {
