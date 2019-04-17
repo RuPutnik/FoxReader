@@ -1,13 +1,19 @@
 package ru.putnik.foxreader.controller;
 
 import javafx.concurrent.Task;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Side;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Button;
+import javafx.scene.control.ContextMenu;
+import javafx.scene.control.MenuItem;
 import javafx.scene.image.Image;
+import javafx.scene.input.KeyCode;
+import javafx.scene.input.KeyEvent;
 import javafx.stage.Stage;
 import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
@@ -32,6 +38,7 @@ public class RequestController implements Initializable {
     private static String oldReq;
     private static String request="";
     private static Stage stage;
+    private int i;
 
     private static final String[] KEYWORDS = new String[] {
             "add", "all", "alter", "and", "any","as", "asc", "authorization", "backup", "begin",
@@ -123,6 +130,7 @@ public class RequestController implements Initializable {
         sqlReqArea.setParagraphGraphicFactory(LineNumberFactory.get(sqlReqArea));
         sqlReqArea.setStyle("-fx-font-size: 16; -fx-font-weight: bold;");
         executor = Executors.newSingleThreadExecutor();
+        autocomplete(sqlReqArea);
 
         handleRequestButton.setOnAction(event -> {
             request=sqlReqArea.getText();
@@ -195,5 +203,77 @@ public class RequestController implements Initializable {
         }
         spansBuilder.add(Collections.emptyList(), text.length() - lastKwEnd);
         return spansBuilder.create();
+    }
+    private void autocomplete(CodeArea area) {
+        try {
+            ContextMenu menu = new ContextMenu();
+            EventHandler<KeyEvent> handler = event -> {
+                if (event.getCode() != KeyCode.SPACE) {
+                    if (area.getText().contains(" ")) {
+                        if (i == 0) {
+                            i = area.getCaretColumn();
+                        }
+                        if (i < 0) i = 0;
+                        String text = area.getText() + event.getText();
+                        text = text.toLowerCase();
+                        if ((text.split(" ")[text.split(" ").length - 1]).length() > 2) {
+
+                            menu.getItems().clear();
+                            text = (text.split(" ")[text.split(" ").length - 1]);
+                            for (int a = 0; a < KEYWORDS.length; a++) {
+                                int b = a;
+                                if (KEYWORDS[a].contains(text)) {
+                                    MenuItem item = new MenuItem(KEYWORDS[a]);
+                                    item.setOnAction(event1 -> {
+                                        area.replace(i, area.getCaretColumn(), KEYWORDS[b].toUpperCase(), new ArrayList<>());
+                                    });
+                                    menu.getItems().add(item);
+                                }
+                            }
+                            if (menu.getItems().size() > 0) {
+                                menu.show(area, Side.RIGHT, 0, 0);
+                            }
+                        }
+                    } else {
+                        if (area.getText().length() > 2) {
+                            menu.getItems().clear();
+                            for (int a = 0; a < KEYWORDS.length; a++) {
+                                int b = a;
+                                if (KEYWORDS[a].contains(area.getText())) {
+                                    MenuItem item = new MenuItem(KEYWORDS[a]);
+                                    item.setOnAction(event1 -> {
+                                        if (i < 0) i = 0;
+                                        area.replace(i, area.getCaretColumn(), KEYWORDS[b].toUpperCase(), new ArrayList<>());
+                                    });
+                                    menu.getItems().add(item);
+                                }
+                            }
+                            if (menu.getItems().size() > 0) {
+                                menu.show(area, Side.LEFT, 0, 0);
+                            }
+                        }
+                    }
+                }
+                if (event.getCode() == KeyCode.SPACE) {
+                    i = 0;
+                }
+                if (event.getCode() == KeyCode.BACK_SPACE) {
+                    i = area.getCaretColumn() - 1;
+                }
+            };
+            EventHandler<KeyEvent> handler1 = event -> {
+                if (event.getText().equals("'") || ((event.getCode() == KeyCode.DIGIT9 && event.isShiftDown())) || (event.getCode() == KeyCode.OPEN_BRACKET && event.isShiftDown())) {
+                    if (event.getText().equals("'")) {
+                        area.appendText(event.getText());
+                    } else if (event.getCode() == KeyCode.DIGIT9 && event.isShiftDown()) {
+                        area.appendText(")");
+                    } else if (event.getCode() == KeyCode.OPEN_BRACKET && event.isShiftDown()) {
+                        area.appendText("}");
+                    }
+                }
+            };
+            area.addEventFilter(KeyEvent.KEY_PRESSED, handler);
+            area.addEventFilter(KeyEvent.KEY_RELEASED, handler1);
+        } catch (Exception ignored) {}
     }
 }

@@ -40,6 +40,8 @@ public class MainController extends Application implements Initializable {
     @FXML
     private MenuItem connectionToServerMenuItem;
     @FXML
+    private MenuItem disconnectMenuItem;
+    @FXML
     private Menu timeMenu;
     @FXML
     public TreeView<TypeTreeElement> treeDBTreeView;
@@ -114,6 +116,7 @@ public class MainController extends Application implements Initializable {
         tableDBTableView.setTableMenuButtonVisible(true);
         tableDBTableView.setEditable(true);
         textRequestTextField.setEditable(false);
+        disconnectMenuItem.setDisable(true);
 
         connectionToServerMenuItem.setOnAction(event -> {
             property = connectionController.showView(stage);
@@ -134,6 +137,7 @@ public class MainController extends Application implements Initializable {
                     modeRealSQLCheckBox.setDisable(false);
                     sendRequestButton.setDisable(false);
                     editInWindowButton.setDisable(false);
+                    disconnectMenuItem.setDisable(false);
                 } catch (SQLException e) {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Ошибка подключения");

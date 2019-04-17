@@ -3,12 +3,12 @@ package ru.putnik.foxreader.model;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
-import javafx.scene.control.Alert;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TreeItem;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import ru.putnik.foxreader.ConnectionProperty;
 import ru.putnik.foxreader.TypeTreeElement;
@@ -44,15 +44,13 @@ public class MainModel {
         }
     }
 
-    public boolean initializeConnection(ConnectionProperty propertyConnection) throws SQLException {
-        boolean success=false;
+    public void initializeConnection(ConnectionProperty propertyConnection) throws SQLException {
         property=propertyConnection;
         String urlConnection=propertyConnection.createConnectionUrl();
         String login=propertyConnection.getLogin();
         String password=propertyConnection.getPassword();
         DriverManager.setLoginTimeout(2);
         connection=DriverManager.getConnection(urlConnection,login,password);
-        return success;
     }
     public void fillTree(){
         if(connection!=null) {
@@ -143,12 +141,45 @@ public class MainModel {
             columnNames.add(resultSetMetaData.getColumnName(a+1));
             mainController.getAllNames().add(resultSetMetaData.getColumnName(a+1).toLowerCase());
             //Берем из общих данных отдельный список и загружаем его в столбец
-            column.setCellValueFactory(value ->new SimpleObjectProperty<>(value.getValue().get(b)));
+            column.setCellValueFactory(value -> {
+                try {
+                    if (resultSetMetaData.getColumnTypeName(b + 1).equals("bit")) {
+                        boolean a1 = value.getValue().get(b).equals("1");
+
+                        HBox box=new HBox();
+                        CheckBox checkBox = new CheckBox();
+                        checkBox.selectedProperty().setValue(a1);
+                        box.setAlignment(Pos.CENTER);
+                        box.getChildren().add(checkBox);
+                        checkBox.selectedProperty().addListener((ov, old_val, new_val) -> {
+                            String newValue;
+                            if(new_val)
+                                newValue="1";
+                            else
+                                newValue="0";
+                            updateRow(b, newValue, value.getValue());
+                        });
+                        //noinspection unchecked
+                        return new SimpleObjectProperty(box);
+                    } else {
+                        return new SimpleObjectProperty<>(value.getValue().get(b));
+                    }
+                } catch (SQLException e) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Ошибка обработки записи");
+                    alert.setHeaderText("В процессе обновления или загрузки записи возникла ошибка!");
+                    alert.setContentText(e.getLocalizedMessage() + "\n" + "Код ошибки: " + e.getErrorCode());
+                    ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+                    alert.show();
+                    return null;
+                }
+            });
             column.setEditable(true);
             column.setComparator(new StringIntegerComparator());
-            //Либо этот вариант, либо самописные ячейки
-            column.setCellFactory(TextFieldTableCell.forTableColumn());
 
+            if(!resultSetMetaData.getColumnTypeName(a+1).equals("bit")){
+                column.setCellFactory(TextFieldTableCell.forTableColumn());
+            }
             column.setOnEditCommit(event -> {
                 if(!mainController.isSendCustomReq()) {
                     if (useInsert) {
@@ -163,6 +194,10 @@ public class MainModel {
             mainController.tableDBTableView.getColumns().add(column);
         }
         mainController.tableDBTableView.setItems(listColumns);//Загружаем данные в таблицу
+        fillRibbonPane();//Загружаем данные в ленточное отображение
+    }
+    private void fillRibbonPane(){
+
     }
 
     private void addingTablesInTree(TreeItem<TypeTreeElement> database){
