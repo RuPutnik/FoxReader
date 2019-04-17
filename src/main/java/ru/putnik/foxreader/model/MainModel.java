@@ -3,12 +3,15 @@ package ru.putnik.foxreader.model;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
+import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.HBox;
+import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import ru.putnik.foxreader.ConnectionProperty;
 import ru.putnik.foxreader.TypeTreeElement;
@@ -33,15 +36,10 @@ public class MainModel {
     private String selectedTable;
     private String selectedSchema;
     private ArrayList<String> columnNames=new ArrayList<>();
+    private ArrayList<String> fullColumnNames=new ArrayList<>();
     private boolean useInsert=false;
     public MainModel(MainController controller){
         mainController=controller;
-        try {
-            Class.forName("com.microsoft.sqlserver.jdbc.SQLServerDriver");
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            e.printStackTrace();
-        }
     }
 
     public void initializeConnection(ConnectionProperty propertyConnection) throws SQLException {
@@ -132,6 +130,7 @@ public class MainModel {
         ResultSet data=statement.executeQuery();
         mainController.tableDBTableView.getColumns().clear();
         columnNames.clear();
+        fullColumnNames.clear();
         ObservableList<List<String>> listColumns = FXCollections.observableArrayList();
         while (data.next()) {
             List<String> list = new ArrayList<>();
@@ -159,6 +158,7 @@ public class MainModel {
             TableColumn<List<String>, String> column =
                     new TableColumn<>(resultSetMetaData.getColumnName(a + 1)+":"+resultSetMetaData.getColumnTypeName(a+1)+"  ");
             columnNames.add(resultSetMetaData.getColumnName(a+1));
+            fullColumnNames.add(resultSetMetaData.getColumnName(a + 1)+":"+resultSetMetaData.getColumnTypeName(a+1));
             mainController.getAllNames().add(resultSetMetaData.getColumnName(a+1).toLowerCase());
             //Берем из общих данных отдельный список и загружаем его в столбец
             column.setCellValueFactory(value -> {
@@ -217,7 +217,27 @@ public class MainModel {
         fillRibbonPane();//Загружаем данные в ленточное отображение
     }
     private void fillRibbonPane(){
+        createGraphicStructurePane();
         mainController.countAllRowLabel.setText("Количество записей: "+mainController.tableDBTableView.getItems().size());
+    }
+    private void createGraphicStructurePane(){
+        mainController.rowGridPane.getChildren().clear();
+        mainController.rowGridPane.setAlignment(Pos.CENTER);
+        mainController.rowGridPane.getRowConstraints().clear();
+        mainController.rowGridPane.getColumnConstraints().clear();
+
+        Label[] namesColumn=new Label[fullColumnNames.size()];
+        TextField[] fields=new TextField[fullColumnNames.size()];
+        for (int a=0;a<fullColumnNames.size();a++){
+            Label l=new Label(fullColumnNames.get(a));
+            TextField tf=new TextField();
+            namesColumn[a]=l;
+            fields[a]=tf;
+        }
+        for(int b=0;b<namesColumn.length;b++) {
+            mainController.rowGridPane.add(namesColumn[b],0,b);
+            mainController.rowGridPane.add(fields[b],1,b);
+        }
     }
 
     private void addingTablesInTree(TreeItem<TypeTreeElement> database){

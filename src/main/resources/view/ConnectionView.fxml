@@ -11,7 +11,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<VBox alignment="CENTER" prefHeight="293.0" prefWidth="400.0" spacing="10" xmlns="http://javafx.com/javafx/" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.putnik.foxreader.controller.ConnectionController">
+<VBox alignment="CENTER" prefHeight="293.0" prefWidth="400.0" spacing="10" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.putnik.foxreader.controller.ConnectionController">
     <Label text="Данные подключения" />
     <GridPane alignment="CENTER">
         <columnConstraints>
