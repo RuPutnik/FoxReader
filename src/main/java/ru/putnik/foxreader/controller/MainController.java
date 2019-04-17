@@ -151,6 +151,11 @@ public class MainController extends Application implements Initializable {
                 }
             }
         });
+        disconnectMenuItem.setOnAction(event -> {
+            mainModel.disconnect();
+            logRequestTextArea.appendText("Close connection: " + property.createConnectionUrl() + "\n");
+            disableAllWidgets();
+        });
         treeDBTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 if (newValue.getValue().getType() == TypeTreeElement.Type.TABLE) {
@@ -269,14 +274,38 @@ public class MainController extends Application implements Initializable {
         deleteAllRows.setDisable(true);
         sendCustomReq=true;
     }
+    private void disableAllWidgets(){
+        disconnectMenuItem.setDisable(true);
+        treeDBTreeView.setRoot(null);
+        addRow.setDisable(true);
+        deleteRow.setDisable(true);
+        updateTable.setDisable(true);
+        deleteAllRows.setDisable(true);
+        tableDBTableView.getItems().clear();
+        saveRowButton.setDisable(true);
+        addRowButton.setDisable(true);
+        deleteRowButton.setDisable(true);
+        deleteAllRowButton.setDisable(true);
+        updateButton.setDisable(true);
+        lastRowButton.setDisable(true);
+        firstRowButton.setDisable(true);
+        nextRowButton.setDisable(true);
+        backRowButton.setDisable(true);
+        goToRowButton.setDisable(true);
+        numberRowTextField.setDisable(true);
+        textRequestTextField.setEditable(false);
+        modeRealSQLCheckBox.setDisable(true);
+        sendRequestButton.setDisable(true);
+        editInWindowButton.setDisable(true);
+        disconnectMenuItem.setDisable(true);
+        countAllRowLabel.setText("Количество записей: Неизвестно");
+    }
     public boolean isSendCustomReq() {
         return sendCustomReq;
     }
-
     public static void play(){
         launch();
     }
-
     public ArrayList<String> getAllNames() {
         return allNames;
     }

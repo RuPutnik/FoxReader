@@ -52,6 +52,26 @@ public class MainModel {
         DriverManager.setLoginTimeout(2);
         connection=DriverManager.getConnection(urlConnection,login,password);
     }
+    public void disconnect(){
+        if(connection!=null&&property!=null){
+            try {
+                connection.close();
+                Alert alert = new Alert(Alert.AlertType.INFORMATION);
+                alert.setTitle("Соединение закрыто");
+                alert.setHeaderText(null);
+                alert.setContentText("Подключение с сервером " + property.getAddress() + " на порту " + property.getPort() + " было закрыто.");
+                ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+                alert.show();
+            } catch (SQLException e) {
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Ошибка закрытия соединения");
+                alert.setHeaderText("В процессе закрытия соединения возникла ошибка!");
+                alert.setContentText(e.getLocalizedMessage() + "\n" + "Код ошибки: " + e.getErrorCode());
+                ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+                alert.show();
+            }
+        }
+    }
     public void fillTree(){
         if(connection!=null) {
 
@@ -197,7 +217,7 @@ public class MainModel {
         fillRibbonPane();//Загружаем данные в ленточное отображение
     }
     private void fillRibbonPane(){
-
+        mainController.countAllRowLabel.setText("Количество записей: "+mainController.tableDBTableView.getItems().size());
     }
 
     private void addingTablesInTree(TreeItem<TypeTreeElement> database){
