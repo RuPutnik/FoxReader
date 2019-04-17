@@ -27,6 +27,7 @@
         <MenuBar>
             <Menu text="Подключение">
                 <MenuItem fx:id="connectionToServerMenuItem" text="Подключиться к серверу" />
+                <MenuItem fx:id="disconnectMenuItem" text="Отключиться" />
             </Menu>
             <Menu fx:id="timeMenu" text="Системное время" />
         </MenuBar>
@@ -58,17 +59,28 @@
                             </TableView>
                         </Tab>
                         <Tab closable="false" text="Ленточный вид">
-                            <VBox spacing="10">
+                            <VBox alignment="CENTER" spacing="10">
                                 <HBox alignment="CENTER_RIGHT" spacing="10">
-                                    <Label text="Количество записей: " fx:id="countAllRowLabel"/>
-                                    <TextField promptText="Введите номер записи" disable="true" fx:id="numberRowTextField"/>
-                                    <Button text="Перейти" disable="true" fx:id="goToRowButton"/>
+                                    <Label fx:id="countAllRowLabel" text="Количество записей: Неизвестно" />
+                                    <TextField fx:id="numberRowTextField" disable="true" promptText="Введите номер записи" />
+                                    <Button fx:id="goToRowButton" disable="true" text="Перейти" />
                                     <padding>
-                                        <Insets top="5" right="5"/>
+                                        <Insets right="5" top="5" />
                                     </padding>
                                 </HBox>
-                                <ScrollPane prefHeight="333.0" prefWidth="609.0">
-                                    <GridPane fx:id="rowGridPane" />
+                                <ScrollPane pannable="true" prefHeight="333.0" prefWidth="609.0" fitToWidth="true" fitToHeight="true">
+                                    <GridPane fx:id="rowGridPane" alignment="CENTER">
+                                        <columnConstraints>
+                                            <ColumnConstraints hgrow="SOMETIMES" halignment="CENTER"/>
+                                        </columnConstraints>
+                                        <rowConstraints>
+                                            <RowConstraints vgrow="SOMETIMES" valignment="CENTER"/>
+                                        </rowConstraints>
+                                        <Label prefHeight="17.0" prefWidth="124.0" text="Нет данных" alignment="CENTER" GridPane.columnIndex="0" GridPane.rowIndex="0" />
+                                    </GridPane>
+                           <VBox.margin>
+                              <Insets />
+                           </VBox.margin>
                                 </ScrollPane>
                                 <HBox alignment="BOTTOM_CENTER" prefHeight="102.0" prefWidth="609.0" style=" -fx-border-color:lightgray; -fx-border-width: 1; -fx-border-style: solid; -fx-border-radius: 10;">
                                     <GridPane alignment="CENTER" hgap="10" vgap="10">
@@ -104,10 +116,10 @@
                 </TabPane>
             </HBox>
             <HBox alignment="CENTER" spacing="10">
-                <CheckBox fx:id="modeRealSQLCheckBox" text="Режим реального SQL" disable="true"/>
+                <CheckBox fx:id="modeRealSQLCheckBox" disable="true" text="Режим реального SQL" />
                 <TextField fx:id="textRequestTextField" minWidth="400" promptText="Введите фильтр" />
-                <Button fx:id="sendRequestButton" text="Обработать" disable="true"/>
-                <Button fx:id="editInWindowButton" text="Ввести в окне" disable="true"/>
+                <Button fx:id="sendRequestButton" disable="true" text="Обработать" />
+                <Button fx:id="editInWindowButton" disable="true" text="Ввести в окне" />
             </HBox>
 
             <padding>
