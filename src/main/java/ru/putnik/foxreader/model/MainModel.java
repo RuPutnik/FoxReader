@@ -39,6 +39,9 @@ public class MainModel {
     private ArrayList<String> columnNames=new ArrayList<>();
     private ArrayList<String> fullColumnNames=new ArrayList<>();
     private boolean useInsert=false;
+    private TextField[] fields;
+    private CheckBox[] checkBoxes;
+
     public MainModel(MainController controller){
         mainController=controller;
     }
@@ -226,7 +229,7 @@ public class MainModel {
     }
     private void fillRibbonPane(){
         createGraphicStructurePane();
-        mainController.countAllRowLabel.setText("Количество записей: "+mainController.tableDBTableView.getItems().size());
+        mainController.countAllRowLabel.setText(String.valueOf(mainController.tableDBTableView.getItems().size()));
         openPage(mainController.getNumberPage());
     }
     private void createGraphicStructurePane(){
@@ -248,8 +251,8 @@ public class MainModel {
         }
 
         Label[] namesColumn=new Label[fullColumnNames.size()];
-        TextField[] fields=new TextField[fullColumnNames.size()-countCheckBoxInRow+1];
-        CheckBox[] checkBoxes=new CheckBox[countCheckBoxInRow];
+        fields=new TextField[fullColumnNames.size()-countCheckBoxInRow+1];
+        checkBoxes=new CheckBox[countCheckBoxInRow];
         for (int a=0;a<fullColumnNames.size();a++){
             Label l=new Label(fullColumnNames.get(a));
             namesColumn[a] = l;
@@ -274,7 +277,26 @@ public class MainModel {
         }
     }
     public void openPage(int numberPage){
-        System.out.println(mainController.tableDBTableView.getItems().get(numberPage));
+        System.out.println(numberPage);
+        if(mainController.tableDBTableView.getItems().size()>0){
+            System.out.println(mainController.tableDBTableView.getItems().get(numberPage));
+            int c=0;
+            int d=0;
+            for(int a=0;a<fullColumnNames.size();a++){
+                if(!fullColumnNames.get(a).split(": ")[1].equals("bit")){
+                    fields[c].setText(mainController.tableDBTableView.getItems().get(numberPage).get(a));
+                    c++;
+                }
+            }
+            for(int a=0;a<fullColumnNames.size();a++){
+                if(fullColumnNames.get(a).split(": ")[1].equals("bit")){
+                    boolean isSelected;
+                    isSelected = mainController.tableDBTableView.getItems().get(numberPage).get(a).equals("1");
+                    checkBoxes[d].setSelected(isSelected);
+                    d++;
+                }
+            }
+        }
     }
 
     private void addingTablesInTree(TreeItem<TypeTreeElement> database){

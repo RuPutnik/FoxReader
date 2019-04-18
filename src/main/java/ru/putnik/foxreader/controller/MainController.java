@@ -4,6 +4,7 @@ import javafx.application.Application;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.fxml.Initializable;
+import javafx.geometry.Pos;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.*;
@@ -155,11 +156,22 @@ public class MainController extends Application implements Initializable {
             mainModel.disconnect();
             logRequestTextArea.appendText("Close connection: " + property.createConnectionUrl() + "\n");
             disableAllWidgets();
+            rowGridPane.getChildren().clear();
+            numberPage=0;
+            mainModel.openPage(numberPage);
+            numberRowTextField.setText(String.valueOf(0));
+            tableDBTableView.getColumns().clear();
+            Label l=new Label("Нет данных");
+            l.setAlignment(Pos.CENTER);
+            rowGridPane.add(l,0,0);
         });
         treeDBTreeView.getSelectionModel().selectedItemProperty().addListener((observable, oldValue, newValue) -> {
             if (newValue != null) {
                 if (newValue.getValue().getType() == TypeTreeElement.Type.TABLE) {
+                    numberPage=0;
+                    numberRowTextField.setText(String.valueOf(numberPage));
                     mainModel.firstFillTable(newValue.getValue().getName(), newValue.getValue().getNameDB(), newValue.getValue().getSchema());
+                    mainModel.openPage(numberPage);
                     addRow.setDisable(false);
                     deleteRow.setDisable(false);
                     updateTable.setDisable(false);
@@ -176,8 +188,6 @@ public class MainController extends Application implements Initializable {
                     backRowButton.setDisable(false);
                     goToRowButton.setDisable(false);
                     numberRowTextField.setDisable(false);
-                    numberPage=0;
-                    numberRowTextField.setText(String.valueOf(numberPage));
                 }
             }
         });
@@ -253,7 +263,7 @@ public class MainController extends Application implements Initializable {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Ошибка перехода на страницу таблицу");
                     alert.setHeaderText(null);
-                    alert.setContentText("Номер страницы должен быть целым числом больше 0 и меньше количества записей");
+                    alert.setContentText("Номер страницы должен быть целым неотрицательным числом меньшим количества записей");
                     ((Stage) alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
                     alert.show();
                 }
@@ -341,7 +351,7 @@ public class MainController extends Application implements Initializable {
         sendRequestButton.setDisable(true);
         editInWindowButton.setDisable(true);
         disconnectMenuItem.setDisable(true);
-        countAllRowLabel.setText("Количество записей: Неизвестно");
+        countAllRowLabel.setText("Неизвестно");
     }
     public boolean isSendCustomReq() {
         return sendCustomReq;
