@@ -87,12 +87,13 @@ public class ConnectionController implements Initializable {
             if(!login.equals("")&&!password.equals("")&&!port.equals("")) {
 
                 try{
-                    Integer.parseInt(port);
+                    int p =Integer.parseInt(port);
+                    if(p<=0) throw new NumberFormatException();
                 }catch (NumberFormatException ex){
                     Alert alert=new Alert(Alert.AlertType.ERROR);
                     alert.setTitle("Ошибка подключения");
                     alert.setHeaderText("Ошибка при указании порта");
-                    alert.setContentText("Номер порта должен быть целым числом");
+                    alert.setContentText("Номер порта должен быть целым числом больше нуля");
                     ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
                     alert.show();
 

@@ -158,7 +158,6 @@ public class MainController extends Application implements Initializable {
             disableAllWidgets();
             rowGridPane.getChildren().clear();
             numberPage=0;
-            mainModel.openPage(numberPage);
             numberRowTextField.setText(String.valueOf(0));
             tableDBTableView.getColumns().clear();
             Label l=new Label("Нет данных");
@@ -171,7 +170,6 @@ public class MainController extends Application implements Initializable {
                     numberPage=0;
                     numberRowTextField.setText(String.valueOf(numberPage));
                     mainModel.firstFillTable(newValue.getValue().getName(), newValue.getValue().getNameDB(), newValue.getValue().getSchema());
-                    mainModel.openPage(numberPage);
                     addRow.setDisable(false);
                     deleteRow.setDisable(false);
                     updateTable.setDisable(false);
@@ -236,19 +234,26 @@ public class MainController extends Application implements Initializable {
             deleteRow.setDisable(false);
             addRow.setDisable(false);
             deleteAllRows.setDisable(false);
+            deleteRowButton.setDisable(false);
+            addRowButton.setDisable(false);
+            saveRowButton.setDisable(false);
+            deleteAllRowButton.setDisable(false);
             sendCustomReq=false;
         });
         deleteAllRows.setOnAction(event -> {
             mainModel.deleteAllRows();
         });
         saveRowButton.setOnAction(event -> {
-
+            mainModel.savePage();
+        });
+        addRowButton.setOnAction(event -> {
+            mainModel.addPage();
         });
         deleteRowButton.setOnAction(event -> {
-
+            mainModel.deletePage();
         });
         deleteAllRowButton.setOnAction(event -> {
-
+            mainModel.deleteAllRows();
         });
         goToRowButton.setOnAction(event -> {
             if(tableDBTableView.getItems()!=null) {
@@ -281,6 +286,11 @@ public class MainController extends Application implements Initializable {
             numberPage=0;
             numberRowTextField.setText(String.valueOf(numberPage));
             mainModel.openPage(numberPage);
+
+            deleteRowButton.setDisable(false);
+            addRowButton.setDisable(false);
+            saveRowButton.setDisable(false);
+            deleteAllRowButton.setDisable(false);
         });
         firstRowButton.setOnAction(event -> {
             numberPage=0;
@@ -289,7 +299,7 @@ public class MainController extends Application implements Initializable {
         });
         lastRowButton.setOnAction(event -> {
             numberPage=tableDBTableView.getItems().size()-1;
-            numberRowTextField.setText(String.valueOf(numberPage-1));
+            numberRowTextField.setText(String.valueOf(numberPage));
             mainModel.openPage(numberPage);
         });
         nextRowButton.setOnAction(event -> {
@@ -325,6 +335,10 @@ public class MainController extends Application implements Initializable {
         deleteRow.setDisable(true);
         addRow.setDisable(true);
         deleteAllRows.setDisable(true);
+        deleteRowButton.setDisable(true);
+        addRowButton.setDisable(true);
+        saveRowButton.setDisable(true);
+        deleteAllRowButton.setDisable(true);
         sendCustomReq=true;
     }
     private void disableAllWidgets(){
@@ -362,6 +376,11 @@ public class MainController extends Application implements Initializable {
     public ArrayList<String> getAllNames() {
         return allNames;
     }
+
+    public void setNumberPage(int numberPage) {
+        this.numberPage = numberPage;
+    }
+
     public int getNumberPage(){
         return numberPage;
     }

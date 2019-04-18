@@ -61,7 +61,7 @@
                         <Tab closable="false" text="Ленточный вид">
                             <VBox alignment="CENTER" spacing="10.0">
                                 <HBox alignment="CENTER_RIGHT" spacing="10">
-                                    <Label text="Общее количсетво записей:"/>
+                                    <Label text="Общее количество записей:"/>
                                     <Label fx:id="countAllRowLabel" text="Неизвестно" />
                                     <Label text="Номер текущей записи:" />
                                     <TextField fx:id="numberRowTextField" disable="true" promptText="Введите номер записи"/>

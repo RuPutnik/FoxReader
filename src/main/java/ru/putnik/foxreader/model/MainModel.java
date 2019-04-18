@@ -277,9 +277,7 @@ public class MainModel {
         }
     }
     public void openPage(int numberPage){
-        System.out.println(numberPage);
         if(mainController.tableDBTableView.getItems().size()>0){
-            System.out.println(mainController.tableDBTableView.getItems().get(numberPage));
             int c=0;
             int d=0;
             for(int a=0;a<fullColumnNames.size();a++){
@@ -298,7 +296,72 @@ public class MainModel {
             }
         }
     }
-
+    public void savePage(){
+        ArrayList<String> newRow=new ArrayList<>();
+        List<String> oldRow=mainController.tableDBTableView.getItems().get(mainController.getNumberPage());
+        String updateValue="";
+        int updateNumberColumn=0;
+        int c=0;
+        int d=0;
+        for (String fullColumnName : fullColumnNames) {
+            if (fullColumnName.split(": ")[1].equals("bit")) {
+                if (checkBoxes[c].isSelected()) {
+                    newRow.add("1");
+                } else {
+                    newRow.add("0");
+                }
+                c++;
+            } else {
+                newRow.add(fields[d].getText());
+                d++;
+            }
+        }
+        for(int n=0;n<oldRow.size();n++){
+            if(!oldRow.get(n).equals(newRow.get(n))){
+                updateValue=newRow.get(n);
+                updateNumberColumn=n;
+                break;
+            }
+        }
+        if(useInsert){
+            insertInto(updateNumberColumn,updateValue);
+        }else {
+            updateRow(updateNumberColumn, updateValue, oldRow);
+        }
+    }
+    public void deletePage(){
+        int newNumberPage=0;
+        int oldNumberPage=mainController.getNumberPage();
+        if(mainController.getNumberPage()>0){
+            newNumberPage=mainController.getNumberPage()-1;
+        }else{
+            newNumberPage++;
+        }
+        mainController.setNumberPage(newNumberPage);
+        mainController.numberRowTextField.setText(String.valueOf(newNumberPage));
+        removeRow(oldNumberPage);
+    }
+    public void addPage(){
+        ArrayList<String> newRow=new ArrayList<>();
+        for (int a=0;a<fullColumnNames.size();a++){
+            newRow.add("NULL");
+        }
+        int c=0,d=0;
+        for(int a=0;a<fullColumnNames.size();a++){
+            if(c<fields.length) {
+                fields[c].setText("NULL");
+                c++;
+            }
+        }
+        for(int b=0;b<fullColumnNames.size();b++){
+            if(d<checkBoxes.length) {
+                checkBoxes[d].setSelected(false);
+                d++;
+            }
+        }
+        mainController.tableDBTableView.getItems().add(newRow);
+        useInsert=true;
+    }
     private void addingTablesInTree(TreeItem<TypeTreeElement> database){
         try {
             ResultSet tableResultSet = connection.getMetaData().getTables(null, null, null, null);
@@ -377,7 +440,6 @@ public class MainModel {
                 }
             }
             reqUpdate.append(";");
-
             sendRequest(reqUpdate.toString(), true);
 
     }
@@ -468,17 +530,24 @@ public class MainModel {
             }
         }
         builderDeleteReq.append(";");
+        mainController.setNumberPage(0);
+        mainController.numberRowTextField.setText(String.valueOf(mainController.getNumberPage()));
         sendRequest(builderDeleteReq.toString(),true);
     }
     public void deleteAllRows(){
         String sqlReq;
         sqlReq="TRUNCATE TABLE "+selectedTable+";";
         sendRequest(sqlReq,true);
+        mainController.setNumberPage(0);
     }
     public void addRow(){
         ArrayList<String> newRow=new ArrayList<>();
-        for (int a=0;a<columnNames.size();a++){
-            newRow.add("NULL");
+        for (int a=0;a<fullColumnNames.size();a++){
+            if(fullColumnNames.get(a).split(": ")[1].equals("bit")){
+                newRow.add("0");
+            }else {
+                newRow.add("NULL");
+            }
         }
         mainController.tableDBTableView.getItems().add(newRow);
         useInsert=true;
