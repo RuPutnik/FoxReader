@@ -25,9 +25,6 @@ import java.util.*;
  */
 public class MainController extends Application implements Initializable {
     private static final String PATH_FXML= "view/MainView.fxml";
-
-
-
     private MainModel mainModel;
     private ConnectionController connectionController=new ConnectionController();
     private RequestController requestController;
@@ -36,6 +33,7 @@ public class MainController extends Application implements Initializable {
     private int indexRow;
     private boolean sendCustomReq=false;
     private static ArrayList<String> allNames=new ArrayList<>();
+    private int numberPage=0;
 
     @FXML
     private MenuItem connectionToServerMenuItem;
@@ -178,6 +176,8 @@ public class MainController extends Application implements Initializable {
                     backRowButton.setDisable(false);
                     goToRowButton.setDisable(false);
                     numberRowTextField.setDisable(false);
+                    numberPage=0;
+                    numberRowTextField.setText(String.valueOf(numberPage));
                 }
             }
         });
@@ -240,20 +240,61 @@ public class MainController extends Application implements Initializable {
         deleteAllRowButton.setOnAction(event -> {
 
         });
+        goToRowButton.setOnAction(event -> {
+            if(tableDBTableView.getItems()!=null) {
+                try {
+                    int num = Integer.parseInt(numberRowTextField.getText());
+                    if (num < 0 || num > tableDBTableView.getItems().size() - 1) {
+                        throw new Exception();
+                    }
+                    numberPage=num;
+                    mainModel.openPage(numberPage);
+                } catch (Exception e) {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Ошибка перехода на страницу таблицу");
+                    alert.setHeaderText(null);
+                    alert.setContentText("Номер страницы должен быть целым числом больше 0 и меньше количества записей");
+                    ((Stage) alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+                    alert.show();
+                }
+            }else{
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Ошибка перехода на страницу таблицы");
+                alert.setHeaderText(null);
+                alert.setContentText("Выбранная таблица пуста");
+                ((Stage) alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+                alert.show();
+            }
+        });
         updateButton.setOnAction(event -> {
-
+            mainModel.updateTable();
+            numberPage=0;
+            numberRowTextField.setText(String.valueOf(numberPage));
+            mainModel.openPage(numberPage);
         });
         firstRowButton.setOnAction(event -> {
-
+            numberPage=0;
+            numberRowTextField.setText(String.valueOf(numberPage));
+            mainModel.openPage(numberPage);
         });
         lastRowButton.setOnAction(event -> {
-
+            numberPage=tableDBTableView.getItems().size()-1;
+            numberRowTextField.setText(String.valueOf(numberPage-1));
+            mainModel.openPage(numberPage);
         });
         nextRowButton.setOnAction(event -> {
-
+            if(tableDBTableView.getItems()!=null&&numberPage<tableDBTableView.getItems().size()-1){
+                numberPage++;
+                numberRowTextField.setText(String.valueOf(numberPage));
+                mainModel.openPage(numberPage);
+            }
         });
         backRowButton.setOnAction(event -> {
-
+            if(tableDBTableView.getItems()!=null&&numberPage>0){
+                numberPage--;
+                numberRowTextField.setText(String.valueOf(numberPage));
+                mainModel.openPage(numberPage);
+            }
         });
         stage.setOnCloseRequest(event -> {
             System.exit(0);
@@ -310,5 +351,8 @@ public class MainController extends Application implements Initializable {
     }
     public ArrayList<String> getAllNames() {
         return allNames;
+    }
+    public int getNumberPage(){
+        return numberPage;
     }
 }

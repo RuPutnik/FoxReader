@@ -11,6 +11,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.HBox;
+import javafx.scene.layout.RowConstraints;
 import javafx.scene.text.TextAlignment;
 import javafx.stage.Stage;
 import ru.putnik.foxreader.ConnectionProperty;
@@ -156,9 +157,9 @@ public class MainModel {
             //Формируем столбец
             ResultSetMetaData resultSetMetaData=statement.getMetaData();
             TableColumn<List<String>, String> column =
-                    new TableColumn<>(resultSetMetaData.getColumnName(a + 1)+":"+resultSetMetaData.getColumnTypeName(a+1)+"  ");
+                    new TableColumn<>(resultSetMetaData.getColumnName(a + 1)+": "+resultSetMetaData.getColumnTypeName(a+1)+"  ");
             columnNames.add(resultSetMetaData.getColumnName(a+1));
-            fullColumnNames.add(resultSetMetaData.getColumnName(a + 1)+":"+resultSetMetaData.getColumnTypeName(a+1));
+            fullColumnNames.add(resultSetMetaData.getColumnName(a + 1)+": "+resultSetMetaData.getColumnTypeName(a+1));
             mainController.getAllNames().add(resultSetMetaData.getColumnName(a+1).toLowerCase());
             //Берем из общих данных отдельный список и загружаем его в столбец
             column.setCellValueFactory(value -> {
@@ -208,6 +209,13 @@ public class MainModel {
                     } else {
                         updateRow(event.getTablePosition().getColumn(), event.getNewValue(), event.getRowValue());
                     }
+                }else {
+                    Alert alert = new Alert(Alert.AlertType.ERROR);
+                    alert.setTitle("Невозможно изменить занечние ячейки");
+                    alert.setHeaderText("Отказано в изменении данных");
+                    alert.setContentText("После применения Фильтра или SQL запроса необходимо обновить таблицу перед редактированим данных");
+                    ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+                    alert.show();
                 }
             });
             //Загружаем столбец в таблицу
@@ -219,6 +227,7 @@ public class MainModel {
     private void fillRibbonPane(){
         createGraphicStructurePane();
         mainController.countAllRowLabel.setText("Количество записей: "+mainController.tableDBTableView.getItems().size());
+        openPage(mainController.getNumberPage());
     }
     private void createGraphicStructurePane(){
         mainController.rowGridPane.getChildren().clear();
@@ -226,18 +235,46 @@ public class MainModel {
         mainController.rowGridPane.getRowConstraints().clear();
         mainController.rowGridPane.getColumnConstraints().clear();
 
+        ColumnConstraints constraints=new ColumnConstraints();
+        ColumnConstraints constraints1=new ColumnConstraints();
+        mainController.rowGridPane.getColumnConstraints().addAll(constraints,constraints1);
+        constraints1.setHalignment(HPos.CENTER);
+        int countCheckBoxInRow=0;
+        int c=0;
+
+        for(String fullName:fullColumnNames){
+            if(fullName.split(": ")[1].equals("bit"))
+                countCheckBoxInRow++;
+        }
+
         Label[] namesColumn=new Label[fullColumnNames.size()];
-        TextField[] fields=new TextField[fullColumnNames.size()];
+        TextField[] fields=new TextField[fullColumnNames.size()-countCheckBoxInRow+1];
+        CheckBox[] checkBoxes=new CheckBox[countCheckBoxInRow];
         for (int a=0;a<fullColumnNames.size();a++){
             Label l=new Label(fullColumnNames.get(a));
-            TextField tf=new TextField();
-            namesColumn[a]=l;
-            fields[a]=tf;
+            namesColumn[a] = l;
+            if(a<fields.length) {
+                TextField tf = new TextField();
+                fields[a] = tf;
+            }
+        }
+        for(int b=0;b<countCheckBoxInRow;b++){
+            checkBoxes[b]=new CheckBox();
         }
         for(int b=0;b<namesColumn.length;b++) {
             mainController.rowGridPane.add(namesColumn[b],0,b);
-            mainController.rowGridPane.add(fields[b],1,b);
+            if(mainController.tableDBTableView.getItems().size()!=0) {
+                if (fullColumnNames.get(b).split(": ")[1].equals("bit")) {
+                    mainController.rowGridPane.add(checkBoxes[c], 1, b);
+                    c++;
+                } else {
+                    mainController.rowGridPane.add(fields[b], 1, b);
+                }
+            }
         }
+    }
+    public void openPage(int numberPage){
+        System.out.println(mainController.tableDBTableView.getItems().get(numberPage));
     }
 
     private void addingTablesInTree(TreeItem<TypeTreeElement> database){

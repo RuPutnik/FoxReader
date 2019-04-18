@@ -35,14 +35,14 @@
     <center>
         <VBox spacing="10">
             <HBox spacing="10">
-                <VBox spacing="10">
-                    <VBox alignment="CENTER_LEFT" spacing="5">
+                <VBox prefHeight="551.0" prefWidth="263.0" spacing="10">
+                    <VBox alignment="CENTER_LEFT" prefHeight="360.0" prefWidth="367.0" spacing="5">
                         <Label text="Иерархия сервера SQL" />
                         <TreeView fx:id="treeDBTreeView" minHeight="-Infinity" minWidth="-Infinity" prefHeight="338.0" prefWidth="210.0" />
                     </VBox>
                     <TextArea fx:id="logRequestTextArea" editable="false" promptText="Выполненные запросы" />
                 </VBox>
-                <TabPane>
+                <TabPane prefHeight="543.0" prefWidth="684.0">
                     <tabs>
                         <Tab closable="false" text="Табличный вид">
                             <TableView fx:id="tableDBTableView" maxWidth="Infinity" prefHeight="470.0" prefWidth="875.0">
@@ -62,14 +62,14 @@
                             <VBox alignment="CENTER" spacing="10.0">
                                 <HBox alignment="CENTER_RIGHT" spacing="10">
                                     <Label fx:id="countAllRowLabel" text="Количество записей: Неизвестно" />
-                                    <TextField fx:id="numberRowTextField" disable="true" promptText="Введите номер записи" />
+                                    <TextField fx:id="numberRowTextField" disable="true" promptText="Введите номер записи"/>
                                     <Button fx:id="goToRowButton" disable="true" text="Перейти" />
                                     <padding>
                                         <Insets right="5" top="5" />
                                     </padding>
                                 </HBox>
-                                <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="ALWAYS" prefHeight="368.0" prefWidth="684.0">
-                                    <GridPane fx:id="rowGridPane" alignment="CENTER" hgap="50" prefHeight="272.0" prefWidth="682.0" vgap="10">
+                                <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="ALWAYS" prefHeight="375.0" prefWidth="624.0">
+                                    <GridPane fx:id="rowGridPane" alignment="CENTER" hgap="50" prefHeight="393.0" prefWidth="586.0" vgap="10">
                                         <columnConstraints>
                                             <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" />
                                         </columnConstraints>
@@ -126,7 +126,7 @@
     </center>
    <bottom>
          <HBox alignment="TOP_CENTER" spacing="10" BorderPane.alignment="BASELINE_CENTER">
-             <CheckBox fx:id="modeRealSQLCheckBox" disable="true" text="Режим реального SQL" />
+             <CheckBox fx:id="modeRealSQLCheckBox" disable="true" selected="true" text="Режим реального SQL" />
              <TextField fx:id="textRequestTextField" minWidth="400" prefHeight="25.0" prefWidth="400.0" promptText="Введите фильтр" />
              <Button fx:id="sendRequestButton" disable="true" text="Обработать" />
              <Button fx:id="editInWindowButton" disable="true" text="Ввести в окне" />
