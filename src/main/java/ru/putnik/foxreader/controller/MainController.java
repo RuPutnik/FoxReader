@@ -214,6 +214,8 @@ public class MainController extends Application implements Initializable {
         });
         addRow.setOnAction(event->{
             mainModel.addRow();
+            addRow.setDisable(true);
+            addRowButton.setDisable(true);
         });
         deleteRow.setOnAction(event -> {
             indexRow=tableDBTableView.getSelectionModel().getSelectedIndex();
@@ -227,6 +229,8 @@ public class MainController extends Application implements Initializable {
 
             }else {
                 mainModel.removeRow(indexRow);
+                addRow.setDisable(false);
+                addRowButton.setDisable(false);
             }
         });
         updateTable.setOnAction(event -> {
@@ -242,15 +246,21 @@ public class MainController extends Application implements Initializable {
         });
         deleteAllRows.setOnAction(event -> {
             mainModel.deleteAllRows();
+            addRow.setDisable(false);
+            addRowButton.setDisable(false);
         });
         saveRowButton.setOnAction(event -> {
             mainModel.savePage();
         });
         addRowButton.setOnAction(event -> {
             mainModel.addPage();
+            addRow.setDisable(true);
+            addRowButton.setDisable(true);
         });
         deleteRowButton.setOnAction(event -> {
             mainModel.deletePage();
+            addRow.setDisable(false);
+            addRowButton.setDisable(false);
         });
         deleteAllRowButton.setOnAction(event -> {
             mainModel.deleteAllRows();
@@ -282,15 +292,16 @@ public class MainController extends Application implements Initializable {
             }
         });
         updateButton.setOnAction(event -> {
-            mainModel.updateTable();
             numberPage=0;
             numberRowTextField.setText(String.valueOf(numberPage));
+            mainModel.updateTable();
             mainModel.openPage(numberPage);
 
             deleteRowButton.setDisable(false);
             addRowButton.setDisable(false);
             saveRowButton.setDisable(false);
             deleteAllRowButton.setDisable(false);
+
         });
         firstRowButton.setOnAction(event -> {
             numberPage=0;

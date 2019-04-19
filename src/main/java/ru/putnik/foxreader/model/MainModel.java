@@ -41,6 +41,7 @@ public class MainModel {
     private boolean useInsert=false;
     private TextField[] fields;
     private CheckBox[] checkBoxes;
+    private ArrayList<String> addedRow=new ArrayList<>();
 
     public MainModel(MainController controller){
         mainController=controller;
@@ -207,8 +208,16 @@ public class MainModel {
             column.setOnEditCommit(event -> {
                 if(!mainController.isSendCustomReq()) {
                     if (useInsert) {
-                        useInsert = false;
-                        insertInto(event.getTablePosition().getColumn(), event.getNewValue());
+                        addedRow.set(event.getTablePosition().getColumn(),event.getNewValue());
+                        if(insertInto(addedRow)){
+                            useInsert = false;
+                            addedRow.clear();
+                            openSuccessAddingAlert(mainController.tableDBTableView.getItems().size());
+                            mainController.addRowButton.setDisable(false);
+                            mainController.addRow.setDisable(false);
+                        }else{
+                            mainController.tableDBTableView.getItems().add(addedRow);
+                        }
                     } else {
                         updateRow(event.getTablePosition().getColumn(), event.getNewValue(), event.getRowValue());
                     }
@@ -323,8 +332,20 @@ public class MainModel {
                 break;
             }
         }
+
+        addedRow=newRow;
         if(useInsert){
-            insertInto(updateNumberColumn,updateValue);
+            if(insertInto(addedRow)){
+                useInsert=false;
+                addedRow.clear();
+                mainController.addRow.setDisable(false);
+                mainController.addRowButton.setDisable(false);
+                openSuccessAddingAlert(mainController.tableDBTableView.getItems().size());
+            }else{
+                addedRow=newRow;
+                mainController.tableDBTableView.getItems().add(addedRow);
+                openPage(mainController.tableDBTableView.getItems().size()-1);
+            }
         }else {
             updateRow(updateNumberColumn, updateValue, oldRow);
         }
@@ -357,6 +378,13 @@ public class MainModel {
             if(d<checkBoxes.length) {
                 checkBoxes[d].setSelected(false);
                 d++;
+            }
+        }
+        for(int k=0;k<fullColumnNames.size();k++){
+            if(fullColumnNames.get(k).split(": ")[1].equals("bit")){
+                addedRow.add("0");
+            }else {
+                addedRow.add("NULL");
             }
         }
         mainController.tableDBTableView.getItems().add(newRow);
@@ -418,7 +446,7 @@ public class MainModel {
     private void updateRow(int columnIndex, String newValue, List<String> row){
             ArrayList<String> newRow = new ArrayList<>(row);
 
-            StringBuilder reqUpdate = new StringBuilder("UPDATE " + selectedTable + " SET ");
+            StringBuilder reqUpdate = new StringBuilder("UPDATE [" + selectedTable + "] SET ");
 
             if (newValue.toLowerCase().equals("null")) {
                 reqUpdate.append(columnNames.get(columnIndex)).append("=").append(newValue);
@@ -443,18 +471,39 @@ public class MainModel {
             sendRequest(reqUpdate.toString(), true);
 
     }
-    private void insertInto(int columnIndex, String newValue){
-        StringBuilder reqInsert = new StringBuilder("INSERT INTO " + selectedTable + "(");
+    private boolean insertInto(List<String> newRow){
+        ArrayList<String> newRowWithoutNull=new ArrayList<>();
+        ArrayList<String> requiredNamesColumn=new ArrayList<>();
+        StringBuilder reqInsert;
 
-        reqInsert.append(columnNames.get(columnIndex));
-        reqInsert.append(") VALUES(");
-        if(newValue.toLowerCase().equals("null")) {
-            reqInsert.append(newValue);
-        }else {
-            reqInsert.append("'").append(newValue).append("'");
+        for(int a=0;a<newRow.size();a++){
+            if(!newRow.get(a).toLowerCase().equals("null")){
+                newRowWithoutNull.add(newRow.get(a));
+                requiredNamesColumn.add(columnNames.get(a));
+            }
         }
-        reqInsert.append(");");
-        sendRequest(reqInsert.toString(),true);
+
+        if(newRowWithoutNull.size()>0) {
+            reqInsert = new StringBuilder("INSERT INTO [" + selectedTable + "](");
+
+            for (int a = 0; a < requiredNamesColumn.size(); a++) {
+                reqInsert.append(requiredNamesColumn.get(a));
+                if (a < requiredNamesColumn.size() - 1) {
+                    reqInsert.append(", ");
+                }
+            }
+            reqInsert.append(") VALUES(");
+            for (int c = 0; c < newRowWithoutNull.size(); c++) {
+                reqInsert.append("'").append(newRowWithoutNull.get(c)).append("'");
+                if (c < requiredNamesColumn.size() - 1) {
+                    reqInsert.append(", ");
+                }
+            }
+            reqInsert.append(");");
+        }else {
+            return false;
+        }
+        return sendRequest(reqInsert.toString(),true);
     }
     public boolean checkTypeRequest(String req){
         boolean isUpdate=false;
@@ -465,7 +514,8 @@ public class MainModel {
 
         return isUpdate;
     }
-    public void sendRequest(String textReq, boolean updateDB){
+    public boolean sendRequest(String textReq, boolean updateDB){
+        boolean success=true;
         try {
             if(!textReq.trim().equals("")) {
                 if(updateDB) {
@@ -473,7 +523,6 @@ public class MainModel {
                     updateTable();
                 }else {
                     fillTable(connection.prepareStatement(textReq));
-
                 }
                 mainController.logRequestTextArea.appendText(textReq + "\n");
             }
@@ -488,7 +537,9 @@ public class MainModel {
             if(updateDB){
                 updateTable();//Если будет ошибка, данные в графичиской части должны откатиться к реальным
             }
+            success=false;
         }
+        return success;
     }
     public void sendFilter(String filter){
         if(selectedDB!=null&&!selectedDB.equals("")&&!filter.trim().equals("")){
@@ -515,9 +566,9 @@ public class MainModel {
     public void removeRow(int indexRow){
         List<String> row=mainController.tableDBTableView.getItems().get(indexRow);
         StringBuilder builderDeleteReq=new StringBuilder();
-        builderDeleteReq.append("DELETE FROM ");
+        builderDeleteReq.append("DELETE FROM [");
         builderDeleteReq.append(selectedTable);
-        builderDeleteReq.append(" WHERE ");
+        builderDeleteReq.append("] WHERE ");
 
         for(int a=0;a<columnNames.size();a++){
             if(row.get(a)==null||row.get(a).toLowerCase().equals("null")){
@@ -536,7 +587,7 @@ public class MainModel {
     }
     public void deleteAllRows(){
         String sqlReq;
-        sqlReq="TRUNCATE TABLE "+selectedTable+";";
+        sqlReq="TRUNCATE TABLE ["+selectedTable+"];";
         sendRequest(sqlReq,true);
         mainController.setNumberPage(0);
     }
@@ -549,11 +600,27 @@ public class MainModel {
                 newRow.add("NULL");
             }
         }
+        for(int k=0;k<fullColumnNames.size();k++){
+            if(fullColumnNames.get(k).split(": ")[1].equals("bit")){
+                addedRow.add("0");
+            }else {
+                addedRow.add("NULL");
+            }
+        }
         mainController.tableDBTableView.getItems().add(newRow);
         useInsert=true;
     }
     public void updateTable(){
         firstFillTable(selectedTable,selectedDB,selectedSchema);
+
+    }
+    private void openSuccessAddingAlert(int numberRow){
+        Alert alert=new Alert(Alert.AlertType.INFORMATION);
+        alert.setTitle("Новая запись успешно добавлена!");
+        alert.setHeaderText(null);
+        alert.setContentText("Запись под номером "+numberRow+" успешно добавлена в таблицу "+selectedTable);
+        ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+        alert.show();
     }
     private class StringIntegerComparator implements Comparator<String>{
         @Override
