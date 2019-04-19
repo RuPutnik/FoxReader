@@ -8,11 +8,13 @@ public class TypeTreeElement {
     private Type type;
     private String nameDB;//the catalog
     private String schema;//if null then this element is database or catalog
+    private String nameTable;
 
-    public TypeTreeElement(Type type, String name,String nameDB,String schema){
+    public TypeTreeElement(Type type, String name,String nameDB,String nameTable,String schema){
         this.type=type;
         this.name=name;
         this.nameDB=nameDB;
+        this.nameTable=nameTable;
         this.schema=schema;
     }
 
@@ -35,6 +37,10 @@ public class TypeTreeElement {
 
     public String getSchema() {
         return schema;
+    }
+
+    public String getNameTable() {
+        return nameTable;
     }
 
     public enum Type{

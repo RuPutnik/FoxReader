@@ -77,7 +77,7 @@ public class MainModel {
     public void fillTree(){
         if(connection!=null) {
             TreeItem<TypeTreeElement> rootItem=new TreeItem<>();
-            rootItem.setValue(new TypeTreeElement(Type.SERVER,"Сервер "+property.getTypeServer()+" "+property.getAddress()+":"+property.getPort()+"    ",null,null));
+            rootItem.setValue(new TypeTreeElement(Type.SERVER,"Сервер "+property.getTypeServer()+" "+property.getAddress()+":"+property.getPort()+"    ",null,null,null));
             rootItem.setGraphic(new ImageView(new Image("icons/server.jpg")));
             if(getNameTableConnect(property).equals("")) {
                 try {
@@ -85,7 +85,7 @@ public class MainModel {
                     while (dbResultSet.next()) {
                         TreeItem<TypeTreeElement> database = new TreeItem<>();
 
-                        database.setValue(new TypeTreeElement(Type.DATABASE,dbResultSet.getString(1),dbResultSet.getString(1),null));
+                        database.setValue(new TypeTreeElement(Type.DATABASE,dbResultSet.getString(1),dbResultSet.getString(1),null,null));
                         database.setGraphic(new ImageView(new Image("icons/base.jpg")));
                         connection.setCatalog(database.getValue().getName());
                         addingTablesInTree(database);
@@ -100,7 +100,7 @@ public class MainModel {
                 }
             }else{
                 TreeItem<TypeTreeElement> database = new TreeItem<>();
-                database.setValue(new TypeTreeElement(Type.DATABASE,getNameTableConnect(property),getNameTableConnect(property),null));
+                database.setValue(new TypeTreeElement(Type.DATABASE,getNameTableConnect(property),getNameTableConnect(property),null,null));
                 database.setGraphic(new ImageView(new Image("icons/base.jpg")));
                 addingTablesInTree(database);
                 addingViewsInTree(database);
@@ -396,10 +396,10 @@ public class MainModel {
         try {
             ResultSet tableResultSet = connection.getMetaData().getTables(null, null, null, null);
             TreeItem<TypeTreeElement> systemTable = new TreeItem<>();
-            systemTable.setValue(new TypeTreeElement(Type.TABLES,"Системные таблицы",connection.getCatalog(),null));
+            systemTable.setValue(new TypeTreeElement(Type.TABLES,"Системные таблицы",connection.getCatalog(),null,null));
             database.getChildren().add(systemTable);
             TreeItem<TypeTreeElement> tables = new TreeItem<>();
-            tables.setValue(new TypeTreeElement(Type.TABLES,"Таблицы",connection.getCatalog(),null));
+            tables.setValue(new TypeTreeElement(Type.TABLES,"Таблицы",connection.getCatalog(),null,null));
             database.getChildren().add(tables);
             boolean systemDB=false;
             for (String name:systemDBName){
@@ -415,7 +415,7 @@ public class MainModel {
                             tableResultSet.getString("TABLE_SCHEM").equals("dbo")) {
 
                         TreeItem<TypeTreeElement> table = new TreeItem<>();
-                        table.setValue(new TypeTreeElement(Type.TABLE,tableResultSet.getString("TABLE_NAME"),connection.getCatalog(),tableResultSet.getString("TABLE_SCHEM")));
+                        table.setValue(new TypeTreeElement(Type.TABLE,tableResultSet.getString("TABLE_NAME"),connection.getCatalog(),tableResultSet.getString("TABLE_NAME"),tableResultSet.getString("TABLE_SCHEM")));
                         table.setGraphic(new ImageView(new Image("icons/table.jpg")));
                         addingComponentsOfTable(table);
                         if (tableResultSet.getString("TABLE_NAME").equals("sysdiagrams")) {
@@ -427,7 +427,7 @@ public class MainModel {
                     }
                     if (tableResultSet.getString("TABLE_TYPE").equals("SYSTEM TABLE")) {
                         TreeItem<TypeTreeElement> table = new TreeItem<>();
-                        table.setValue(new TypeTreeElement(Type.TABLE,tableResultSet.getString("TABLE_NAME"),connection.getCatalog(),tableResultSet.getString("TABLE_SCHEM")));
+                        table.setValue(new TypeTreeElement(Type.TABLE,tableResultSet.getString("TABLE_NAME"),connection.getCatalog(),tableResultSet.getString("TABLE_NAME"),tableResultSet.getString("TABLE_SCHEM")));
                         table.setGraphic(new ImageView(new Image("icons/table.jpg")));
                         addingComponentsOfTable(table);
                         database.getChildren().get(0).getChildren().add(table);
@@ -440,7 +440,7 @@ public class MainModel {
                             tableResultSet.getString("TABLE_SCHEM").equals("dbo")) {
 
                         TreeItem<TypeTreeElement> table = new TreeItem<>();
-                        table.setValue(new TypeTreeElement(Type.TABLE,tableResultSet.getString("TABLE_NAME"),connection.getCatalog(),tableResultSet.getString("TABLE_SCHEM")));
+                        table.setValue(new TypeTreeElement(Type.TABLE,tableResultSet.getString("TABLE_NAME"),connection.getCatalog(),tableResultSet.getString("TABLE_NAME"),tableResultSet.getString("TABLE_SCHEM")));
                         table.setGraphic(new ImageView(new Image("icons/table.jpg")));
                         addingComponentsOfTable(table);
                         database.getChildren().get(0).getChildren().add(table);
@@ -453,50 +453,137 @@ public class MainModel {
     }
     private void addingComponentsOfTable(TreeItem<TypeTreeElement> table){
         TreeItem<TypeTreeElement> keys=new TreeItem<>();
-        keys.setValue(new TypeTreeElement(Type.KEYS,"Ключи",table.getValue().getNameDB(),table.getValue().getSchema()));
+        keys.setValue(new TypeTreeElement(Type.KEYS,"Ключи",table.getValue().getNameDB(),table.getValue().getNameTable(),table.getValue().getSchema()));
         keys.setGraphic(new ImageView("icons/keys.jpg"));
         TreeItem<TypeTreeElement> columns=new TreeItem<>();
-        columns.setValue(new TypeTreeElement(Type.COLUMNS,"Столбцы",table.getValue().getNameDB(),table.getValue().getSchema()));
+        columns.setValue(new TypeTreeElement(Type.COLUMNS,"Столбцы",table.getValue().getNameDB(),table.getValue().getNameTable(),table.getValue().getSchema()));
         columns.setGraphic(new ImageView("icons/columns.jpg"));
         table.getChildren().add(keys);
         table.getChildren().add(columns);
+        addingKeys(keys);
+        addingColumns(columns);
+    }
+    private void addingKeys(TreeItem<TypeTreeElement> keysItem){
+        try {
+            ResultSet set=connection.getMetaData().getExportedKeys(keysItem.getValue().getNameDB(),keysItem.getValue().getSchema(),keysItem.getValue().getNameTable());
+            String namePrimaryKey="";
+            String nameForeignKey="";
+
+
+            while (set.next()){
+                if(namePrimaryKey.equals("")){
+                    namePrimaryKey=namePrimaryKey+set.getString("PK_NAME");
+                    TreeItem<TypeTreeElement> primaryKey = new TreeItem<>();
+                    primaryKey.setValue(new TypeTreeElement(Type.PRIMARY_KEY, namePrimaryKey, keysItem.getValue().getNameDB(),keysItem.getValue().getNameTable(), ""));
+                    primaryKey.setGraphic(new ImageView("icons/primary_key.png"));
+                    keysItem.getChildren().add(primaryKey);
+                }
+                nameForeignKey=nameForeignKey+set.getString("FK_NAME");
+
+                TreeItem<TypeTreeElement> foreignKey=new TreeItem<>();
+                foreignKey.setValue(new TypeTreeElement(Type.FOREIGN_KEY,nameForeignKey,keysItem.getValue().getNameDB(),keysItem.getValue().getNameTable(),""));
+                foreignKey.setGraphic(new ImageView("icons/foreign_key.png"));
+                keysItem.getChildren().add(foreignKey);
+            }
+            set.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    private void addingColumns(TreeItem<TypeTreeElement> cols){
+        try {
+            if(!(cols.getValue().getNameTable().equals("syscollector_config_store_internal")||cols.getValue().getNameTable().equals("syspolicy_configuration_internal")||
+                    cols.getValue().getNameTable().equals("sysutility_mi_smo_stage_internal")||
+                    cols.getValue().getNameTable().equals("sysutility_ucp_configuration_internal"))) {
+                ResultSet resSet = connection.prepareStatement("USE " + cols.getValue().getNameDB() + "; SELECT * FROM [" + cols.getValue().getNameTable() + "];").executeQuery();
+                ResultSetMetaData metaData = resSet.getMetaData();
+                resSet.next();
+                     for(int a=1;a<=metaData.getColumnCount();a++){
+                         TreeItem<TypeTreeElement> column=new TreeItem<>();
+                         column.setValue(new TypeTreeElement(Type.COLUMN,metaData.getColumnName(a)+" ("+metaData.getColumnTypeName(a)+")",cols.getValue().getNameDB(),cols.getValue().getNameTable(),""));
+                         column.setGraphic(new ImageView("icons/column.png"));
+                         cols.getChildren().add(column);
+                     }
+                resSet.close();
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
     private void addingProceduresInTree(TreeItem<TypeTreeElement> db){
         TreeItem<TypeTreeElement> procedures=new TreeItem<>();
-        procedures.setValue(new TypeTreeElement(Type.PROCEDURES,"Хранимые процедуры",db.getValue().getNameDB(),db.getValue().getSchema()));
+        procedures.setValue(new TypeTreeElement(Type.PROCEDURES,"Хранимые процедуры",db.getValue().getNameDB(),db.getValue().getNameTable(),db.getValue().getSchema()));
+        addingProcedures(procedures);
         db.getChildren().add(procedures);
+    }
+    private void addingProcedures(TreeItem<TypeTreeElement> db){
+        try {
+            DatabaseMetaData metaData=connection.getMetaData();
+            ResultSet set=metaData.getProcedureColumns(db.getValue().getNameDB(),"dbo","%","%");
+            String previousProcedureName="";
+            while (set.next()){
+                TreeItem<TypeTreeElement> procedure=new TreeItem<>();
+                String procedureName=set.getString(3).split(";")[0];
+                if(!procedureName.equals(previousProcedureName)) {
+                    procedure.setValue(new TypeTreeElement(Type.PROCEDURE, procedureName, db.getValue().getNameDB(),db.getValue().getNameTable(), db.getValue().getSchema()));
+                    procedure.setGraphic(new ImageView("icons/procedure.png"));
+                    db.getChildren().add(procedure);
+                    previousProcedureName=procedureName;
+                }
+            }
+            set.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
     private void addingViewsInTree(TreeItem<TypeTreeElement> db){
         TreeItem<TypeTreeElement> views=new TreeItem<>();
-        views.setValue(new TypeTreeElement(Type.VIEWS,"Представления",db.getValue().getNameDB(),db.getValue().getSchema()));
+        views.setValue(new TypeTreeElement(Type.VIEWS,"Представления",db.getValue().getNameDB(),db.getValue().getNameTable(),db.getValue().getSchema()));
+        addingViews(views);
         db.getChildren().add(views);
     }
+    private void addingViews(TreeItem<TypeTreeElement> item){
+        try {
+            ResultSet set=connection.getMetaData().getTables(item.getValue().getNameDB(), item.getValue().getSchema(), "%", new String[] {"VIEW"});
+            while (set.next()){
+                TreeItem<TypeTreeElement> view=new TreeItem<>();
+                view.setValue(new TypeTreeElement(Type.VIEW,set.getString("TABLE_NAME"),item.getValue().getNameDB(),item.getValue().getNameTable(),item.getValue().getSchema()));
+                view.setGraphic(new ImageView("icons/view.png"));
+                item.getChildren().add(view);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
     private void updateRow(int columnIndex, String newValue, List<String> row){
-            ArrayList<String> newRow = new ArrayList<>(row);
+        ArrayList<String> newRow = new ArrayList<>(row);
 
-            StringBuilder reqUpdate = new StringBuilder("UPDATE [" + selectedTable + "] SET ");
+        StringBuilder reqUpdate = new StringBuilder("UPDATE [" + selectedTable + "] SET ");
 
-            if (newValue.toLowerCase().equals("null")) {
-                reqUpdate.append(columnNames.get(columnIndex)).append("=").append(newValue);
+        if (newValue.toLowerCase().equals("null")) {
+            reqUpdate.append(columnNames.get(columnIndex)).append("=").append(newValue);
+        } else {
+            reqUpdate.append(columnNames.get(columnIndex)).append("='").append(newValue).append("'");
+        }
+
+
+        reqUpdate.append(" WHERE ");
+
+        for (int a = 0; a < columnNames.size(); a++) {
+            if (newRow.get(a).toLowerCase().equals("null") || newRow.get(a) == null) {
+                reqUpdate.append(columnNames.get(a)).append(" IS NULL");
             } else {
-                reqUpdate.append(columnNames.get(columnIndex)).append("='").append(newValue).append("'");
+                reqUpdate.append(columnNames.get(a)).append("='").append(newRow.get(a)).append("'");
             }
-
-
-            reqUpdate.append(" WHERE ");
-
-            for (int a = 0; a < columnNames.size(); a++) {
-                if (newRow.get(a).toLowerCase().equals("null") || newRow.get(a) == null) {
-                    reqUpdate.append(columnNames.get(a)).append(" IS NULL");
-                } else {
-                    reqUpdate.append(columnNames.get(a)).append("='").append(newRow.get(a)).append("'");
-                }
-                if (a < columnNames.size() - 1) {
-                    reqUpdate.append(" AND ");
-                }
+            if (a < columnNames.size() - 1) {
+                reqUpdate.append(" AND ");
             }
-            reqUpdate.append(";");
-            sendRequest(reqUpdate.toString(), true);
+        }
+        reqUpdate.append(";");
+        sendRequest(reqUpdate.toString(), true);
 
     }
     private boolean insertInto(List<String> newRow){
