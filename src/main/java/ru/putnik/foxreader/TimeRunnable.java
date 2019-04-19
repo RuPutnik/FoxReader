@@ -2,9 +2,6 @@ package ru.putnik.foxreader;
 
 import javafx.application.Platform;
 import javafx.scene.control.Menu;
-import javafx.stage.Stage;
-
-import javax.swing.*;
 import java.util.GregorianCalendar;
 
 /**
