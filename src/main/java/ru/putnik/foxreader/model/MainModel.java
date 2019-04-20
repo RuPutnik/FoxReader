@@ -458,17 +458,72 @@ public class MainModel {
         TreeItem<TypeTreeElement> columns=new TreeItem<>();
         columns.setValue(new TypeTreeElement(Type.COLUMNS,"Столбцы",table.getValue().getNameDB(),table.getValue().getNameTable(),table.getValue().getSchema()));
         columns.setGraphic(new ImageView("icons/columns.jpg"));
+        TreeItem<TypeTreeElement> indexes=new TreeItem<>();
+        indexes.setValue(new TypeTreeElement(Type.INDEXES,"Индексы",table.getValue().getNameDB(),table.getValue().getNameTable(),table.getValue().getSchema()));
+        indexes.setGraphic(new ImageView("icons/indexes.png"));
         table.getChildren().add(keys);
         table.getChildren().add(columns);
+        table.getChildren().add(indexes);
         addingKeys(keys);
         addingColumns(columns);
+        addingIndexes(indexes);
+    }
+    private void addingIndexes(TreeItem<TypeTreeElement> indexItem){
+        DatabaseMetaData dbMetaData;
+        try {
+            dbMetaData = connection.getMetaData();
+            ResultSet rs = dbMetaData.getIndexInfo(indexItem.getValue().getNameDB(), indexItem.getValue().getSchema(), indexItem.getValue().getNameTable(), false, false);
+            String previousIndexName="";
+            String nonUnique;
+            String typeIndex="";
+            boolean clustered=false;
+            while (rs.next()) {
+               if(rs.getString("INDEX_NAME")!=null&&!previousIndexName.equals(rs.getString("INDEX_NAME"))) {
+                    TreeItem<TypeTreeElement> index = new TreeItem<>();
+                    if(rs.getBoolean("NON_UNIQUE")){
+                       nonUnique="Не уникальный, ";
+                    }else{
+                       nonUnique="";
+                    }
+                    switch (rs.getShort("TYPE")) {
+                       case DatabaseMetaData.tableIndexClustered:
+                           typeIndex="Кластеризованный";
+                           clustered=true;
+                           break;
+                       case DatabaseMetaData.tableIndexHashed:
+                           typeIndex="Хэшированный";
+                           clustered=false;
+                           break;
+                       case DatabaseMetaData.tableIndexOther:
+                           typeIndex="Некластеризованный";
+                           clustered=false;
+                           break;
+                       case DatabaseMetaData.tableIndexStatistic:
+                           typeIndex = "Статистический";
+                           clustered=false;
+                           break;
+                   }
+                    index.setValue(new TypeTreeElement(Type.INDEX, rs.getString("INDEX_NAME")+" ("+nonUnique+typeIndex+")", indexItem.getValue().getNameDB(),
+                            indexItem.getValue().getNameTable(), indexItem.getValue().getSchema()));
+                    if(clustered) {
+                        index.setGraphic(new ImageView("icons/primary_key.png"));
+                    }else {
+                        index.setGraphic(new ImageView("icons/index.png"));
+                    }
+                    indexItem.getChildren().add(index);
+                    previousIndexName = rs.getString("INDEX_NAME");
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
     }
     private void addingKeys(TreeItem<TypeTreeElement> keysItem){
         try {
             ResultSet set=connection.getMetaData().getExportedKeys(keysItem.getValue().getNameDB(),keysItem.getValue().getSchema(),keysItem.getValue().getNameTable());
             String namePrimaryKey="";
             String nameForeignKey="";
-
 
             while (set.next()){
                 if(namePrimaryKey.equals("")){
@@ -548,12 +603,22 @@ public class MainModel {
     private void addingViews(TreeItem<TypeTreeElement> item){
         try {
             ResultSet set=connection.getMetaData().getTables(item.getValue().getNameDB(), item.getValue().getSchema(), "%", new String[] {"VIEW"});
+            TreeItem<TypeTreeElement> sysviews = new TreeItem<>();
+            sysviews.setValue(new TypeTreeElement(Type.VIEWS, "Системные представления", item.getValue().getNameDB(), item.getValue().getNameTable(), item.getValue().getSchema()));
             while (set.next()){
-                TreeItem<TypeTreeElement> view=new TreeItem<>();
-                view.setValue(new TypeTreeElement(Type.VIEW,set.getString("TABLE_NAME"),item.getValue().getNameDB(),item.getValue().getNameTable(),item.getValue().getSchema()));
-                view.setGraphic(new ImageView("icons/view.png"));
-                item.getChildren().add(view);
+                if(set.getString("TABLE_SCHEM").equals("dbo")) {
+                    TreeItem<TypeTreeElement> view = new TreeItem<>();
+                    view.setValue(new TypeTreeElement(Type.VIEW, set.getString("TABLE_NAME"), item.getValue().getNameDB(), item.getValue().getNameTable(), item.getValue().getSchema()));
+                    view.setGraphic(new ImageView("icons/view.png"));
+                    item.getChildren().add(view);
+                }else{
+                    TreeItem<TypeTreeElement> view = new TreeItem<>();
+                    view.setValue(new TypeTreeElement(Type.VIEW, set.getString("TABLE_NAME"), item.getValue().getNameDB(), item.getValue().getNameTable(), item.getValue().getSchema()));
+                    view.setGraphic(new ImageView("icons/view.png"));
+                    sysviews.getChildren().add(view);
+                }
             }
+            item.getChildren().add(sysviews);
         } catch (SQLException e) {
             e.printStackTrace();
         }
