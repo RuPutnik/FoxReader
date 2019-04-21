@@ -24,17 +24,21 @@ public class ConnectionProperty {
         this.nameDB=nameDB;
         this.port=port;
 
-        if(typeServer.equals("Microsoft MS SQL")){
-            patternConnection="jdbc:sqlserver:";
-        }else if(typeServer.equals("Oracle MySQL")){
-            patternConnection="jdbc:mysql:";
-        }else{
-            Alert alert=new Alert(Alert.AlertType.ERROR);
-            alert.setTitle("Ошибка подключения");
-            alert.setHeaderText("Не установлен протокол подключения");
-            alert.setContentText("Для данного типа сервера не удалось найти протокол подключения. Подключение недоступно.");
-            ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
-            alert.show();
+        switch (typeServer) {
+            case "Microsoft MS SQL":
+                patternConnection = "jdbc:sqlserver:";
+                break;
+            case "Oracle MySQL":
+                patternConnection = "jdbc:mysql:";
+                break;
+            default:
+                Alert alert = new Alert(Alert.AlertType.ERROR);
+                alert.setTitle("Ошибка подключения");
+                alert.setHeaderText("Не установлен протокол подключения");
+                alert.setContentText("Для данного типа сервера не удалось найти протокол подключения. Подключение недоступно.");
+                ((Stage) alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+                alert.show();
+                break;
         }
     }
     public String createConnectionUrl(){

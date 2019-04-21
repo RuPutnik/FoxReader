@@ -16,6 +16,7 @@ import javafx.scene.image.Image;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
 import ru.putnik.foxreader.ConnectionProperty;
+import ru.putnik.foxreader.FLogger;
 
 import java.io.IOException;
 import java.net.URL;
@@ -94,7 +95,7 @@ public class ConnectionController implements Initializable {
                     alert.setContentText("Номер порта должен быть целым числом больше нуля");
                     ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
                     alert.show();
-
+                    FLogger.error("Ошибка подключения (при указании порта)",ex);
                 }
 
                 property = new ConnectionProperty(typeServerComboBox.getValue(),addressServer, login, password, nameDB, Integer.parseInt(port));
@@ -132,6 +133,7 @@ public class ConnectionController implements Initializable {
             property=null;
             stage.close();
         });
+
     }
     private void installDefaultSetting(){
         portTextField.setText("1433");

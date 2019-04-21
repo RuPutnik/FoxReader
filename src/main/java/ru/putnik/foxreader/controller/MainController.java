@@ -13,9 +13,11 @@ import javafx.scene.layout.GridPane;
 import javafx.stage.Stage;
 
 import ru.putnik.foxreader.ConnectionProperty;
+import ru.putnik.foxreader.FLogger;
 import ru.putnik.foxreader.TimeRunnable;
 import ru.putnik.foxreader.TypeTreeElement;
 import ru.putnik.foxreader.model.MainModel;
+import ru.putnik.foxreader.model.TreeOperationsMainModel;
 
 import java.net.URL;
 import java.sql.SQLException;
@@ -35,6 +37,7 @@ public class MainController extends Application implements Initializable {
     private boolean sendCustomReq=false;
     private static ArrayList<String> allNames=new ArrayList<>();
     private int numberPage=0;
+    private TreeOperationsMainModel operationsMainModel;
 
     @FXML
     private MenuItem connectionToServerMenuItem;
@@ -112,6 +115,7 @@ public class MainController extends Application implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         mainModel = new MainModel(this);
+
         playTimer();
         logRequestTextArea.setStyle("-fx-text-fill: green");
         tableDBTableView.setTableMenuButtonVisible(true);
@@ -134,6 +138,8 @@ public class MainController extends Application implements Initializable {
 
                     mainModel.fillTree();
 
+                    operationsMainModel=new TreeOperationsMainModel(this,mainModel);
+
                     textRequestTextField.setEditable(true);
                     modeRealSQLCheckBox.setDisable(false);
                     sendRequestButton.setDisable(false);
@@ -146,6 +152,7 @@ public class MainController extends Application implements Initializable {
                     alert.setContentText(e.getLocalizedMessage() + "\n" + "Код ошибки: " + e.getErrorCode());
                     ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
                     alert.show();
+                    FLogger.error("Ошибка подключения",e);
                     logRequestTextArea.appendText("Fail connection: " + property.createConnectionUrl() + "\n");
                 } finally {
                     logRequestTextArea.positionCaret(0);
@@ -186,9 +193,65 @@ public class MainController extends Application implements Initializable {
                     backRowButton.setDisable(false);
                     goToRowButton.setDisable(false);
                     numberRowTextField.setDisable(false);
+
+                    MenuItem deleteTableItem=new MenuItem("Удалить таблицу");
+                    deleteTableItem.setOnAction(event -> {
+                        operationsMainModel.removeTable(newValue);
+                    });
+                    ContextMenu removeTable=new ContextMenu();
+                    removeTable.getItems().add(deleteTableItem);
+                    treeDBTreeView.setContextMenu(removeTable);
+                }else if(newValue.getValue().getType() == TypeTreeElement.Type.TABLES){
+                    MenuItem addTableItem=new MenuItem("Создать таблицу");
+                    addTableItem.setOnAction(event -> {
+                        operationsMainModel.addTable(newValue);
+                    });
+                    ContextMenu addTable=new ContextMenu();
+                    addTable.getItems().add(addTableItem);
+                    treeDBTreeView.setContextMenu(addTable);
+                }else if(newValue.getValue().getType() == TypeTreeElement.Type.PROCEDURE){
+                    MenuItem deleteProcedureItem=new MenuItem("Удалить хранимую процедуру");
+                    MenuItem runProcedureItem=new MenuItem("Запустить хранимую процедуру");
+                    deleteProcedureItem.setOnAction(event -> {
+                        operationsMainModel.removeProcedure(newValue);
+                    });
+                    runProcedureItem.setOnAction(event -> {
+                        operationsMainModel.executeProcedure(newValue);
+                    });
+                    ContextMenu removeProcedure=new ContextMenu();
+                    removeProcedure.getItems().add(runProcedureItem);
+                    removeProcedure.getItems().add(deleteProcedureItem);
+                    treeDBTreeView.setContextMenu(removeProcedure);
+                }else if(newValue.getValue().getType() == TypeTreeElement.Type.PROCEDURES){
+                    MenuItem addProcedureItem=new MenuItem("Создать хранимую процедуру");
+                    addProcedureItem.setOnAction(event -> {
+                        operationsMainModel.addProcedure(newValue);
+                    });
+                    ContextMenu addProcedure=new ContextMenu();
+                    addProcedure.getItems().add(addProcedureItem);
+                    treeDBTreeView.setContextMenu(addProcedure);
+                }else if(newValue.getValue().getType() == TypeTreeElement.Type.DATABASE){
+                    MenuItem deleteDBItem=new MenuItem("Удалить базу данных");
+                    deleteDBItem.setOnAction(event -> {
+                        operationsMainModel.removeDB(newValue);
+                    });
+                    ContextMenu removeDB=new ContextMenu();
+                    removeDB.getItems().add(deleteDBItem);
+                    treeDBTreeView.setContextMenu(removeDB);
+                }else if(newValue.getValue().getType() == TypeTreeElement.Type.SERVER){
+                    MenuItem addDBItem=new MenuItem("Создать базу данных");
+                    addDBItem.setOnAction(event -> {
+                        operationsMainModel.addDB(newValue);
+                    });
+                    ContextMenu addDB=new ContextMenu();
+                    addDB.getItems().add(addDBItem);
+                    treeDBTreeView.setContextMenu(addDB);
+                }else {
+                    treeDBTreeView.setContextMenu(null);
                 }
             }
         });
+
         modeRealSQLCheckBox.setOnAction(event -> {
             if (modeRealSQLCheckBox.isSelected()) {
                 textRequestTextField.setPromptText("Введите SQL запрос");
@@ -276,11 +339,12 @@ public class MainController extends Application implements Initializable {
                     mainModel.openPage(numberPage);
                 } catch (Exception e) {
                     Alert alert = new Alert(Alert.AlertType.ERROR);
-                    alert.setTitle("Ошибка перехода на страницу таблицу");
+                    alert.setTitle("Ошибка перехода на страницу таблицы");
                     alert.setHeaderText(null);
                     alert.setContentText("Номер страницы должен быть целым неотрицательным числом меньшим количества записей");
                     ((Stage) alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
                     alert.show();
+                    FLogger.error("Ошибка перехода на страницу таблицы",e);
                 }
             }else{
                 Alert alert = new Alert(Alert.AlertType.ERROR);
@@ -378,6 +442,7 @@ public class MainController extends Application implements Initializable {
         disconnectMenuItem.setDisable(true);
         countAllRowLabel.setText("Неизвестно");
     }
+
     public boolean isSendCustomReq() {
         return sendCustomReq;
     }

@@ -71,6 +71,7 @@ public class MainModel {
                 alert.setContentText(e.getLocalizedMessage() + "\n" + "Код ошибки: " + e.getErrorCode());
                 ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
                 alert.show();
+                error("Ошибка при попытке отключения от сервера ",e);
             }
         }
     }
@@ -97,6 +98,7 @@ public class MainModel {
                     }
                 } catch (SQLException e) {
                     e.printStackTrace();
+                    error("Ошибка при генерации дерева ",e);
                 }
             }else{
                 TreeItem<TypeTreeElement> database = new TreeItem<>();
@@ -131,6 +133,7 @@ public class MainModel {
             mainController.logRequestTextArea.appendText(request+"\n");
         } catch (SQLException e) {
             e.printStackTrace();
+            error("Ошибка при загрузке таблицы ",e);
         }
     }
     private void fillTable(PreparedStatement statement) throws SQLException{
@@ -198,6 +201,7 @@ public class MainModel {
                     alert.setContentText(e.getLocalizedMessage() + "\n" + "Код ошибки: " + e.getErrorCode());
                     ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
                     alert.show();
+                    error("Ошибка обработки записи ",e);
                     return null;
                 }
             });
@@ -449,6 +453,7 @@ public class MainModel {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            error("Ошибка при добавлении таблиц в дерево ",e);
         }
     }
     private void addingComponentsOfTable(TreeItem<TypeTreeElement> table){
@@ -516,6 +521,7 @@ public class MainModel {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+            error("Ошибка при добавлении индексов в дерево ",e);
         }
 
     }
@@ -543,6 +549,7 @@ public class MainModel {
             set.close();
         } catch (SQLException e) {
             e.printStackTrace();
+            error("Ошибка при добавлении ключей в дерево ",e);
         }
     }
     private void addingColumns(TreeItem<TypeTreeElement> cols){
@@ -564,6 +571,7 @@ public class MainModel {
 
         } catch (SQLException e) {
             e.printStackTrace();
+            error("Ошибка при добавлении столбцов в дерево ",e);
         }
 
     }
@@ -591,6 +599,7 @@ public class MainModel {
             set.close();
         } catch (SQLException e) {
             e.printStackTrace();
+            error("Ошибка при добавлении процедур в дерево ",e);
         }
 
     }
@@ -621,6 +630,7 @@ public class MainModel {
             item.getChildren().add(sysviews);
         } catch (SQLException e) {
             e.printStackTrace();
+            error("Ошибка при добавлении отображений в дерево",e);
         }
     }
     private void updateRow(int columnIndex, String newValue, List<String> row){
@@ -705,7 +715,7 @@ public class MainModel {
                     fillTable(connection.prepareStatement(textReq));
                 }
                 mainController.logRequestTextArea.appendText(textReq + "\n");
-                request(textReq);
+                request("Запрос "+textReq);
             }
         } catch (SQLException e) {
             Alert alert=new Alert(Alert.AlertType.ERROR);
@@ -719,7 +729,7 @@ public class MainModel {
                 updateTable();//Если будет ошибка, данные в графичиской части должны откатиться к реальным
             }
             success=false;
-            error(textReq,e);
+            error("Ошибка выполнения запроса "+textReq,e);
         }
         return success;
     }
@@ -830,5 +840,9 @@ public class MainModel {
                 return 1;
             }
         }
+    }
+
+    public Connection getConnection() {
+        return connection;
     }
 }

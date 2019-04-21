@@ -6,8 +6,8 @@ package ru.putnik.foxreader;
 public class TypeTreeElement {
     private String name;
     private Type type;
-    private String nameDB;//the catalog
-    private String schema;//if null then this element is database or catalog
+    private String nameDB;//the catalog in jdbc
+    private String schema;
     private String nameTable;
 
     public TypeTreeElement(Type type, String name,String nameDB,String nameTable,String schema){
@@ -44,6 +44,7 @@ public class TypeTreeElement {
     }
 
     public enum Type{
-        TABLES,TABLE, DATABASE,SERVER,  KEYS,PRIMARY_KEY,FOREIGN_KEY,  COLUMNS,COLUMN,  PROCEDURES,PROCEDURE,  VIEWS,VIEW, INDEXES, INDEX
+        DATABASE,SERVER,  TABLES,TABLE,  KEYS,PRIMARY_KEY,FOREIGN_KEY,  COLUMNS,COLUMN,  PROCEDURES,PROCEDURE,
+        VIEWS,VIEW, INDEXES,INDEX
     }
 }
