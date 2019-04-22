@@ -584,16 +584,39 @@ public class MainModel {
     private void addingProcedures(TreeItem<TypeTreeElement> db){
         try {
             DatabaseMetaData metaData=connection.getMetaData();
+
             ResultSet set=metaData.getProcedureColumns(db.getValue().getNameDB(),"dbo","%","%");
             String previousProcedureName="";
             while (set.next()){
                 TreeItem<TypeTreeElement> procedure=new TreeItem<>();
+
                 String procedureName=set.getString(3).split(";")[0];
                 if(!procedureName.equals(previousProcedureName)) {
                     procedure.setValue(new TypeTreeElement(Type.PROCEDURE, procedureName, db.getValue().getNameDB(),db.getValue().getNameTable(), db.getValue().getSchema()));
                     procedure.setGraphic(new ImageView("icons/procedure.png"));
                     db.getChildren().add(procedure);
                     previousProcedureName=procedureName;
+
+                }
+            }
+            ResultSet set1=metaData.getProcedureColumns(db.getValue().getNameDB(),"dbo","%","%");
+            while (set1.next()){
+                for(int a=0;a<db.getChildren().size();a++){
+                    if(db.getChildren().get(a).getValue().getName().equals(set1.getString(3).split(";")[0])){
+                        if(!set1.getString(4).equals("@RETURN_VALUE")) {
+                            String paramType;
+                            if(set1.getString(5).equals("1")){
+                                paramType="Входной";
+                            }else {
+                                paramType="Выходной";
+                            }
+                            String dataParam=set1.getString(4)+" ("+set1.getString(7)+","+paramType+")   ";
+                            TreeItem<TypeTreeElement> procedureParam = new TreeItem<>();
+                            procedureParam.setValue(new TypeTreeElement(Type.PROCEDURE_PARAM, dataParam, db.getValue().getNameDB(), db.getValue().getNameTable(), db.getValue().getSchema()));
+                            procedureParam.setGraphic(new ImageView("icons/param.png"));
+                            db.getChildren().get(a).getChildren().add(procedureParam);
+                        }
+                    }
                 }
             }
             set.close();

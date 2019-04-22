@@ -19,6 +19,7 @@ import org.fxmisc.richtext.CodeArea;
 import org.fxmisc.richtext.LineNumberFactory;
 import org.fxmisc.richtext.model.StyleSpans;
 import org.fxmisc.richtext.model.StyleSpansBuilder;
+import ru.putnik.foxreader.model.RequestModel;
 
 import java.io.IOException;
 import java.net.URL;
@@ -33,6 +34,7 @@ import java.util.regex.Pattern;
  * Создано 15.04.2019 в 14:33
  */
 public class RequestController implements Initializable {
+    private RequestModel model=new RequestModel();
     private static final String PATH_FXML= "view/RequestView.fxml";
     private static MainController controller;
     private static String oldReq;
@@ -131,6 +133,13 @@ public class RequestController implements Initializable {
         sqlReqArea.setStyle("-fx-font-size: 16; -fx-font-weight: bold;");
         executor = Executors.newSingleThreadExecutor();
         autocomplete(sqlReqArea);
+        ContextMenu menu=new ContextMenu();
+        MenuItem item=new MenuItem("Показать план выполнения");
+        item.setOnAction(event -> {
+            model.printPlaneExecute(sqlReqArea.getText());
+        });
+        menu.getItems().add(item);
+        sqlReqArea.setContextMenu(menu);
 
         handleRequestButton.setOnAction(event -> {
             request=sqlReqArea.getText();
