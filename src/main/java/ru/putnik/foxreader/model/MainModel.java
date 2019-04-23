@@ -13,6 +13,7 @@ import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.HBox;
 import javafx.stage.Stage;
 import ru.putnik.foxreader.ConnectionProperty;
+import ru.putnik.foxreader.ImageLoader;
 import ru.putnik.foxreader.TypeTreeElement;
 import ru.putnik.foxreader.controller.MainController;
 
@@ -41,6 +42,7 @@ public class MainModel {
     private TextField[] fields;
     private CheckBox[] checkBoxes;
     private ArrayList<String> addedRow=new ArrayList<>();
+    private ImageLoader imageLoader=new ImageLoader();
 
     public MainModel(MainController controller){
         mainController=controller;
@@ -62,14 +64,14 @@ public class MainModel {
                 alert.setTitle("Соединение закрыто");
                 alert.setHeaderText(null);
                 alert.setContentText("Подключение с сервером " + property.getAddress() + " на порту " + property.getPort() + " было закрыто.");
-                ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+                ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(ImageLoader.getIconImage());
                 alert.show();
             } catch (SQLException e) {
                 Alert alert = new Alert(Alert.AlertType.ERROR);
                 alert.setTitle("Ошибка закрытия соединения");
                 alert.setHeaderText("В процессе закрытия соединения возникла ошибка!");
                 alert.setContentText(e.getLocalizedMessage() + "\n" + "Код ошибки: " + e.getErrorCode());
-                ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+                ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(ImageLoader.getIconImage());
                 alert.show();
                 error("Ошибка при попытке отключения от сервера ",e);
             }
@@ -79,7 +81,7 @@ public class MainModel {
         if(connection!=null) {
             TreeItem<TypeTreeElement> rootItem=new TreeItem<>();
             rootItem.setValue(new TypeTreeElement(Type.SERVER,"Сервер "+property.getTypeServer()+" "+property.getAddress()+":"+property.getPort()+"    ",null,null,null));
-            rootItem.setGraphic(new ImageView(new Image("icons/server.jpg")));
+            rootItem.setGraphic(new ImageView(ImageLoader.getServer()));
             if(getNameTableConnect(property).equals("")) {
                 try {
                     ResultSet dbResultSet = connection.getMetaData().getCatalogs();
@@ -87,7 +89,7 @@ public class MainModel {
                         TreeItem<TypeTreeElement> database = new TreeItem<>();
 
                         database.setValue(new TypeTreeElement(Type.DATABASE,dbResultSet.getString(1),dbResultSet.getString(1),null,null));
-                        database.setGraphic(new ImageView(new Image("icons/base.jpg")));
+                        database.setGraphic(new ImageView(ImageLoader.getBase()));
                         connection.setCatalog(database.getValue().getName());
                         addingTablesInTree(database);
                         addingViewsInTree(database);
@@ -103,7 +105,7 @@ public class MainModel {
             }else{
                 TreeItem<TypeTreeElement> database = new TreeItem<>();
                 database.setValue(new TypeTreeElement(Type.DATABASE,getNameTableConnect(property),getNameTableConnect(property),null,null));
-                database.setGraphic(new ImageView(new Image("icons/base.jpg")));
+                database.setGraphic(new ImageView(ImageLoader.getBase()));
                 addingTablesInTree(database);
                 addingViewsInTree(database);
                 addingProceduresInTree(database);
@@ -156,7 +158,6 @@ public class MainModel {
                 if(valueCell==null){
                     valueCell="NULL";
                 }
-
                 list.add(valueCell);
             }
             listColumns.add(list);
@@ -199,7 +200,7 @@ public class MainModel {
                     alert.setTitle("Ошибка обработки записи");
                     alert.setHeaderText("В процессе обновления или загрузки записи возникла ошибка!");
                     alert.setContentText(e.getLocalizedMessage() + "\n" + "Код ошибки: " + e.getErrorCode());
-                    ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+                    ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(ImageLoader.getIconImage());
                     alert.show();
                     error("Ошибка обработки записи ",e);
                     return null;
@@ -232,7 +233,7 @@ public class MainModel {
                     alert.setTitle("Невозможно изменить занечние ячейки");
                     alert.setHeaderText("Отказано в изменении данных");
                     alert.setContentText("После применения Фильтра или SQL запроса необходимо обновить таблицу перед редактированим данных");
-                    ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+                    ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(ImageLoader.getIconImage());
                     alert.show();
                 }
             });
@@ -420,7 +421,7 @@ public class MainModel {
 
                         TreeItem<TypeTreeElement> table = new TreeItem<>();
                         table.setValue(new TypeTreeElement(Type.TABLE,tableResultSet.getString("TABLE_NAME"),connection.getCatalog(),tableResultSet.getString("TABLE_NAME"),tableResultSet.getString("TABLE_SCHEM")));
-                        table.setGraphic(new ImageView(new Image("icons/table.jpg")));
+                        table.setGraphic(new ImageView(ImageLoader.getTable()));
                         addingComponentsOfTable(table);
                         if (tableResultSet.getString("TABLE_NAME").equals("sysdiagrams")) {
                             database.getChildren().get(0).getChildren().add(table);
@@ -432,7 +433,7 @@ public class MainModel {
                     if (tableResultSet.getString("TABLE_TYPE").equals("SYSTEM TABLE")) {
                         TreeItem<TypeTreeElement> table = new TreeItem<>();
                         table.setValue(new TypeTreeElement(Type.TABLE,tableResultSet.getString("TABLE_NAME"),connection.getCatalog(),tableResultSet.getString("TABLE_NAME"),tableResultSet.getString("TABLE_SCHEM")));
-                        table.setGraphic(new ImageView(new Image("icons/table.jpg")));
+                        table.setGraphic(new ImageView(ImageLoader.getTable()));
                         addingComponentsOfTable(table);
                         database.getChildren().get(0).getChildren().add(table);
                         mainController.getAllNames().add(tableResultSet.getString("TABLE_NAME").toLowerCase());
@@ -445,7 +446,7 @@ public class MainModel {
 
                         TreeItem<TypeTreeElement> table = new TreeItem<>();
                         table.setValue(new TypeTreeElement(Type.TABLE,tableResultSet.getString("TABLE_NAME"),connection.getCatalog(),tableResultSet.getString("TABLE_NAME"),tableResultSet.getString("TABLE_SCHEM")));
-                        table.setGraphic(new ImageView(new Image("icons/table.jpg")));
+                        table.setGraphic(new ImageView(ImageLoader.getTable()));
                         addingComponentsOfTable(table);
                         database.getChildren().get(0).getChildren().add(table);
                     }
@@ -459,13 +460,13 @@ public class MainModel {
     private void addingComponentsOfTable(TreeItem<TypeTreeElement> table){
         TreeItem<TypeTreeElement> keys=new TreeItem<>();
         keys.setValue(new TypeTreeElement(Type.KEYS,"Ключи",table.getValue().getNameDB(),table.getValue().getNameTable(),table.getValue().getSchema()));
-        keys.setGraphic(new ImageView("icons/keys.jpg"));
+        keys.setGraphic(new ImageView(ImageLoader.getKeys()));
         TreeItem<TypeTreeElement> columns=new TreeItem<>();
         columns.setValue(new TypeTreeElement(Type.COLUMNS,"Столбцы",table.getValue().getNameDB(),table.getValue().getNameTable(),table.getValue().getSchema()));
-        columns.setGraphic(new ImageView("icons/columns.jpg"));
+        columns.setGraphic(new ImageView(ImageLoader.getColumns()));
         TreeItem<TypeTreeElement> indexes=new TreeItem<>();
         indexes.setValue(new TypeTreeElement(Type.INDEXES,"Индексы",table.getValue().getNameDB(),table.getValue().getNameTable(),table.getValue().getSchema()));
-        indexes.setGraphic(new ImageView("icons/indexes.png"));
+        indexes.setGraphic(new ImageView(ImageLoader.getIndexes()));
         table.getChildren().add(keys);
         table.getChildren().add(columns);
         table.getChildren().add(indexes);
@@ -511,9 +512,9 @@ public class MainModel {
                     index.setValue(new TypeTreeElement(Type.INDEX, rs.getString("INDEX_NAME")+" ("+nonUnique+typeIndex+")", indexItem.getValue().getNameDB(),
                             indexItem.getValue().getNameTable(), indexItem.getValue().getSchema()));
                     if(clustered) {
-                        index.setGraphic(new ImageView("icons/primary_key.png"));
+                        index.setGraphic(new ImageView(ImageLoader.getPrimaryKey()));
                     }else {
-                        index.setGraphic(new ImageView("icons/index.png"));
+                        index.setGraphic(new ImageView(ImageLoader.getIndex()));
                     }
                     indexItem.getChildren().add(index);
                     previousIndexName = rs.getString("INDEX_NAME");
@@ -536,14 +537,14 @@ public class MainModel {
                     namePrimaryKey=namePrimaryKey+set.getString("PK_NAME");
                     TreeItem<TypeTreeElement> primaryKey = new TreeItem<>();
                     primaryKey.setValue(new TypeTreeElement(Type.PRIMARY_KEY, namePrimaryKey, keysItem.getValue().getNameDB(),keysItem.getValue().getNameTable(), ""));
-                    primaryKey.setGraphic(new ImageView("icons/primary_key.png"));
+                    primaryKey.setGraphic(new ImageView(ImageLoader.getPrimaryKey()));
                     keysItem.getChildren().add(primaryKey);
                 }
                 nameForeignKey=nameForeignKey+set.getString("FK_NAME");
 
                 TreeItem<TypeTreeElement> foreignKey=new TreeItem<>();
                 foreignKey.setValue(new TypeTreeElement(Type.FOREIGN_KEY,nameForeignKey,keysItem.getValue().getNameDB(),keysItem.getValue().getNameTable(),""));
-                foreignKey.setGraphic(new ImageView("icons/foreign_key.png"));
+                foreignKey.setGraphic(new ImageView(ImageLoader.getForeignKey()));
                 keysItem.getChildren().add(foreignKey);
             }
             set.close();
@@ -563,7 +564,7 @@ public class MainModel {
                      for(int a=1;a<=metaData.getColumnCount();a++){
                          TreeItem<TypeTreeElement> column=new TreeItem<>();
                          column.setValue(new TypeTreeElement(Type.COLUMN,metaData.getColumnName(a)+" ("+metaData.getColumnTypeName(a)+")",cols.getValue().getNameDB(),cols.getValue().getNameTable(),""));
-                         column.setGraphic(new ImageView("icons/column.png"));
+                         column.setGraphic(new ImageView(ImageLoader.getColumn()));
                          cols.getChildren().add(column);
                      }
                 resSet.close();
@@ -593,7 +594,7 @@ public class MainModel {
                 String procedureName=set.getString(3).split(";")[0];
                 if(!procedureName.equals(previousProcedureName)) {
                     procedure.setValue(new TypeTreeElement(Type.PROCEDURE, procedureName, db.getValue().getNameDB(),db.getValue().getNameTable(), db.getValue().getSchema()));
-                    procedure.setGraphic(new ImageView("icons/procedure.png"));
+                    procedure.setGraphic(new ImageView(ImageLoader.getProcedure()));
                     db.getChildren().add(procedure);
                     previousProcedureName=procedureName;
 
@@ -613,7 +614,7 @@ public class MainModel {
                             String dataParam=set1.getString(4)+" ("+set1.getString(7)+","+paramType+")   ";
                             TreeItem<TypeTreeElement> procedureParam = new TreeItem<>();
                             procedureParam.setValue(new TypeTreeElement(Type.PROCEDURE_PARAM, dataParam, db.getValue().getNameDB(), db.getValue().getNameTable(), db.getValue().getSchema()));
-                            procedureParam.setGraphic(new ImageView("icons/param.png"));
+                            procedureParam.setGraphic(new ImageView(ImageLoader.getParam()));
                             db.getChildren().get(a).getChildren().add(procedureParam);
                         }
                     }
@@ -641,12 +642,12 @@ public class MainModel {
                 if(set.getString("TABLE_SCHEM").equals("dbo")) {
                     TreeItem<TypeTreeElement> view = new TreeItem<>();
                     view.setValue(new TypeTreeElement(Type.VIEW, set.getString("TABLE_NAME"), item.getValue().getNameDB(), item.getValue().getNameTable(), item.getValue().getSchema()));
-                    view.setGraphic(new ImageView("icons/view.png"));
+                    view.setGraphic(new ImageView(ImageLoader.getView()));
                     item.getChildren().add(view);
                 }else{
                     TreeItem<TypeTreeElement> view = new TreeItem<>();
                     view.setValue(new TypeTreeElement(Type.VIEW, set.getString("TABLE_NAME"), item.getValue().getNameDB(), item.getValue().getNameTable(), item.getValue().getSchema()));
-                    view.setGraphic(new ImageView("icons/view.png"));
+                    view.setGraphic(new ImageView(ImageLoader.getView()));
                     sysviews.getChildren().add(view);
                 }
             }
@@ -746,7 +747,7 @@ public class MainModel {
             alert.setHeaderText("При выполнении запроса возникла ошибка!");
             alert.setContentText(e.getLocalizedMessage()+"\n"+"Код ошибки: "+e.getErrorCode());
             alert.show();
-            ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+            ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(ImageLoader.getIconImage());
 
             if(updateDB){
                 updateTable();//Если будет ошибка, данные в графичиской части должны откатиться к реальным
@@ -833,7 +834,7 @@ public class MainModel {
         alert.setTitle("Новая запись успешно добавлена!");
         alert.setHeaderText(null);
         alert.setContentText("Запись под номером "+numberRow+" успешно добавлена в таблицу "+selectedTable);
-        ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+        ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(ImageLoader.getIconImage());
         alert.show();
     }
     private class StringIntegerComparator implements Comparator<String>{

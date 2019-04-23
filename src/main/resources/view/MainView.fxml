@@ -129,7 +129,7 @@
    <bottom>
          <HBox alignment="TOP_CENTER" spacing="10" BorderPane.alignment="BASELINE_CENTER">
              <CheckBox fx:id="modeRealSQLCheckBox" disable="true" selected="true" text="Режим реального SQL" />
-             <TextField fx:id="textRequestTextField" minWidth="400" prefHeight="25.0" prefWidth="400.0" promptText="Введите фильтр" />
+             <TextField fx:id="textRequestTextField" minWidth="400" prefHeight="25.0" prefWidth="400.0" promptText="Введите SQL запрос" />
              <Button fx:id="sendRequestButton" disable="true" text="Обработать" />
              <Button fx:id="editInWindowButton" disable="true" text="Ввести в окне" />
          </HBox>

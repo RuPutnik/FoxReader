@@ -239,11 +239,14 @@ public class MainController extends Application implements Initializable {
                     removeDB.getItems().add(deleteDBItem);
                     treeDBTreeView.setContextMenu(removeDB);
                 }else if(newValue.getValue().getType() == TypeTreeElement.Type.SERVER){
+                    MenuItem updateTree=new MenuItem("Обновить дерево иерархии");
                     MenuItem addDBItem=new MenuItem("Создать базу данных");
                     addDBItem.setOnAction(event -> {
                         operationsMainModel.addDB(newValue);
                     });
+                    updateTree.setOnAction(event->mainModel.fillTree());
                     ContextMenu addDB=new ContextMenu();
+                    addDB.getItems().add(updateTree);
                     addDB.getItems().add(addDBItem);
                     treeDBTreeView.setContextMenu(addDB);
                 }else {
@@ -261,9 +264,10 @@ public class MainController extends Application implements Initializable {
         });
         sendRequestButton.setOnAction(event -> {
             sendRequest(textRequestTextField.getText());
+            mainModel.fillTree();
         });
         editInWindowButton.setOnAction(event -> {
-            requestController=new RequestController(allNames);
+            requestController=new RequestController(this,allNames);
             //Если открыто окно для работы с запросом, запрещено как то изменять его на главном окне
             textRequestTextField.setEditable(false);
             modeRealSQLCheckBox.setDisable(true);
@@ -455,6 +459,10 @@ public class MainController extends Application implements Initializable {
 
     public void setNumberPage(int numberPage) {
         this.numberPage = numberPage;
+    }
+
+    public MainModel getMainModel() {
+        return mainModel;
     }
 
     public int getNumberPage(){

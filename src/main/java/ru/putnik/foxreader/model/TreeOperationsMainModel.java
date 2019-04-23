@@ -29,20 +29,59 @@ public class TreeOperationsMainModel {
     }
 
     public void removeTable(TreeItem<TypeTreeElement> item){
+        if(showWarningDeletion(item)){
+            String req="DROP TABLE dbo."+item.getValue().getName();
 
-        System.out.println("Удалить таблицу: "+item.getValue().getName());
+            try (PreparedStatement ps = model.getConnection().prepareStatement(req)){
+                ps.execute();
+                item.getParent().getChildren().remove(item);
+                controller.logRequestTextArea.appendText(req);
+                showSuccessDeleting(item);
+                FLogger.request(req);
+            } catch (SQLException e) {
+                showErrorDeleting(item,e);
+                FLogger.error("Ошибка в процессе удаления объекта "+item.getValue().getName(),e);
+            }
+        }
+
     }
     public void addTable(TreeItem<TypeTreeElement> item){
         System.out.println("Создать таблицу: "+item.getParent().getValue().getName());
     }
     public void removeDB(TreeItem<TypeTreeElement> item){
-        System.out.println("Удалить базу данных: "+item.getValue().getName());
+        if(showWarningDeletion(item)){
+            String req="DROP DATABASE "+item.getValue().getName();
+
+            try (PreparedStatement ps = model.getConnection().prepareStatement(req)){
+                ps.execute();
+                item.getParent().getChildren().remove(item);
+                FLogger.request(req);
+                controller.logRequestTextArea.appendText(req);
+                showSuccessDeleting(item);
+            } catch (SQLException e) {
+                showErrorDeleting(item,e);
+                FLogger.error("Ошибка в процессе удаления объекта "+item.getValue().getName(),e);
+            }
+        }
     }
     public void addDB(TreeItem<TypeTreeElement> item){
         System.out.println("Создать базу данных: "+item.getValue().getName());
     }
     public void removeProcedure(TreeItem<TypeTreeElement> item){
-        System.out.println("Удалить процедуру: "+item.getValue().getName());
+        if(showWarningDeletion(item)){
+            String req="DROP PROCEDURE "+item.getValue().getName();
+
+            try (PreparedStatement ps = model.getConnection().prepareStatement(req)){
+                ps.execute();
+                item.getParent().getChildren().remove(item);
+                controller.logRequestTextArea.appendText(req);
+                FLogger.request(req);
+                showSuccessDeleting(item);
+            } catch (SQLException e) {
+                showErrorDeleting(item,e);
+                FLogger.error("Ошибка в процессе удаления объекта "+item.getValue().getName(),e);
+            }
+        }
     }
     public void addProcedure(TreeItem<TypeTreeElement> item){
         System.out.println("Создать процедуру: "+item.getParent().getValue().getName());
@@ -140,6 +179,8 @@ public class TreeOperationsMainModel {
                     }
                     showResultDialog(resultsValues,results);
                 }
+                controller.logRequestTextArea.appendText(request.toString());
+                FLogger.request(request.toString());
                 Alert alert=new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Процедура успешно выполнена");
                 alert.setHeaderText(null);
@@ -234,5 +275,37 @@ public class TreeOperationsMainModel {
         ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
         alert.showAndWait();
 
+    }
+    private boolean showWarningDeletion(TreeItem<TypeTreeElement> item){
+        Alert warningDeletion=new Alert(Alert.AlertType.CONFIRMATION);
+        warningDeletion.setTitle("Предупреждение");
+        warningDeletion.setHeaderText("Подтвердите ваше действие");
+        warningDeletion.setContentText("Вы действительно хотите удалить "+item.getValue().getType().toString()+" под названием "+item.getValue().getName());
+        ((Stage)warningDeletion.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+        Optional<ButtonType> result=warningDeletion.showAndWait();
+
+        if (result.get() == ButtonType.OK) {
+            return true;
+        } else if (result.get() == ButtonType.CANCEL) {
+            return false;
+        } else {
+            return false;
+        }
+    }
+    private void showSuccessDeleting(TreeItem<TypeTreeElement> item){
+        Alert warningDeletion=new Alert(Alert.AlertType.INFORMATION);
+        warningDeletion.setTitle("Успешное удаление");
+        warningDeletion.setHeaderText(null);
+        warningDeletion.setContentText("Вы успешно удалили "+item.getValue().getType().toString()+" под названием "+item.getValue().getName());
+        ((Stage)warningDeletion.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+        warningDeletion.show();
+    }
+    private void showErrorDeleting(TreeItem<TypeTreeElement> item,SQLException ex){
+        Alert warningDeletion=new Alert(Alert.AlertType.ERROR);
+        warningDeletion.setTitle("Ошибка удаления");
+        warningDeletion.setHeaderText(null);
+        warningDeletion.setContentText("В процессе удаления "+item.getValue().getType().toString()+" под названием "+item.getValue().getName()+"\nвозникла ошибка: "+ex.getLocalizedMessage());
+        ((Stage)warningDeletion.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+        warningDeletion.show();
     }
 }
