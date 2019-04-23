@@ -22,6 +22,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
+<?import javafx.scene.control.SplitPane?>
 <BorderPane prefHeight="650.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.putnik.foxreader.controller.MainController">
     <top>
         <MenuBar>
@@ -35,14 +36,15 @@
     <center>
         <VBox spacing="10">
             <HBox spacing="10">
-                <VBox prefHeight="551.0" prefWidth="263.0" spacing="10">
+                <SplitPane dividerPositions="0.3" style="-fx-box-border: transparent;">
+                <VBox prefHeight="551.0" spacing="10">
                     <VBox alignment="CENTER_LEFT" prefHeight="360.0" prefWidth="367.0" spacing="5">
                         <Label text="Иерархия сервера SQL" />
                         <TreeView fx:id="treeDBTreeView" minHeight="-Infinity" minWidth="-Infinity" prefHeight="338.0" prefWidth="210.0" />
                     </VBox>
                     <TextArea fx:id="logRequestTextArea" editable="false" promptText="Выполненные запросы" />
                 </VBox>
-                <TabPane prefHeight="543.0" prefWidth="684.0">
+                <TabPane prefHeight="543.0">
                     <tabs>
                         <Tab closable="false" text="Табличный вид">
                             <TableView fx:id="tableDBTableView" maxWidth="Infinity" prefHeight="470.0" prefWidth="875.0">
@@ -70,7 +72,7 @@
                                         <Insets right="5" top="5" />
                                     </padding>
                                 </HBox>
-                                <ScrollPane fx:id="scrollPane" fitToHeight="true" fitToWidth="true" hbarPolicy="ALWAYS" prefHeight="375.0" prefWidth="624.0">
+                                <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="ALWAYS" prefHeight="375.0" prefWidth="624.0">
                                     <GridPane fx:id="rowGridPane" alignment="CENTER" hgap="50" prefHeight="393.0" prefWidth="586.0" vgap="10">
                                         <columnConstraints>
                                             <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" />
@@ -83,9 +85,6 @@
                                             <Insets bottom="10" top="10" />
                                         </padding>
                                     </GridPane>
-                           <VBox.margin>
-                              <Insets />
-                           </VBox.margin>
                                 </ScrollPane>
                                 <HBox alignment="BOTTOM_CENTER" prefHeight="94.0" prefWidth="684.0" style=" -fx-border-color:lightgray; -fx-border-width: 1; -fx-border-style: solid; -fx-border-radius: 10;">
                                     <GridPane alignment="CENTER" hgap="10" vgap="10">
@@ -119,6 +118,7 @@
                         </Tab>
                     </tabs>
                 </TabPane>
+                </SplitPane>
             </HBox>
 
             <padding>

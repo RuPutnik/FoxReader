@@ -7,7 +7,6 @@ import javafx.geometry.HPos;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.TextFieldTableCell;
-import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.HBox;
@@ -42,10 +41,10 @@ public class MainModel {
     private TextField[] fields;
     private CheckBox[] checkBoxes;
     private ArrayList<String> addedRow=new ArrayList<>();
-    private ImageLoader imageLoader=new ImageLoader();
 
     public MainModel(MainController controller){
         mainController=controller;
+        new ImageLoader();
     }
 
     public void initializeConnection(ConnectionProperty propertyConnection) throws SQLException {
@@ -80,7 +79,7 @@ public class MainModel {
     public void fillTree(){
         if(connection!=null) {
             TreeItem<TypeTreeElement> rootItem=new TreeItem<>();
-            rootItem.setValue(new TypeTreeElement(Type.SERVER,"Сервер "+property.getTypeServer()+" "+property.getAddress()+":"+property.getPort()+"    ",null,null,null));
+            rootItem.setValue(new TypeTreeElement(Type.SERVER,"Сервер "+property.getTypeServer()+" "+property.getAddress()+":"+property.getPort(),null,null,null));
             rootItem.setGraphic(new ImageView(ImageLoader.getServer()));
             if(getNameTableConnect(property).equals("")) {
                 try {
@@ -220,8 +219,8 @@ public class MainModel {
                             useInsert = false;
                             addedRow.clear();
                             openSuccessAddingAlert(mainController.tableDBTableView.getItems().size());
-                            mainController.addRowButton.setDisable(false);
-                            mainController.addRow.setDisable(false);
+                            mainController.getAddRowButton().setDisable(false);
+                            mainController.getAddRow().setDisable(false);
                         }else{
                             mainController.tableDBTableView.getItems().add(addedRow);
                         }
@@ -245,18 +244,18 @@ public class MainModel {
     }
     private void fillRibbonPane(){
         createGraphicStructurePane();
-        mainController.countAllRowLabel.setText(String.valueOf(mainController.tableDBTableView.getItems().size()));
+        mainController.getCountAllRowLabel().setText(String.valueOf(mainController.tableDBTableView.getItems().size()));
         openPage(mainController.getNumberPage());
     }
     private void createGraphicStructurePane(){
-        mainController.rowGridPane.getChildren().clear();
-        mainController.rowGridPane.setAlignment(Pos.CENTER);
-        mainController.rowGridPane.getRowConstraints().clear();
-        mainController.rowGridPane.getColumnConstraints().clear();
+        mainController.getRowGridPane().getChildren().clear();
+        mainController.getRowGridPane().setAlignment(Pos.CENTER);
+        mainController.getRowGridPane().getRowConstraints().clear();
+        mainController.getRowGridPane().getColumnConstraints().clear();
 
         ColumnConstraints constraints=new ColumnConstraints();
         ColumnConstraints constraints1=new ColumnConstraints();
-        mainController.rowGridPane.getColumnConstraints().addAll(constraints,constraints1);
+        mainController.getRowGridPane().getColumnConstraints().addAll(constraints,constraints1);
         constraints1.setHalignment(HPos.CENTER);
         int countCheckBoxInRow=0;
         int c=0;
@@ -281,13 +280,13 @@ public class MainModel {
             checkBoxes[b]=new CheckBox();
         }
         for(int b=0;b<namesColumn.length;b++) {
-            mainController.rowGridPane.add(namesColumn[b],0,b);
+            mainController.getRowGridPane().add(namesColumn[b],0,b);
             if(mainController.tableDBTableView.getItems().size()!=0) {
                 if (fullColumnNames.get(b).split(": ")[1].equals("bit")) {
-                    mainController.rowGridPane.add(checkBoxes[c], 1, b);
+                    mainController.getRowGridPane().add(checkBoxes[c], 1, b);
                     c++;
                 } else {
-                    mainController.rowGridPane.add(fields[b], 1, b);
+                    mainController.getRowGridPane().add(fields[b], 1, b);
                 }
             }
         }
@@ -345,8 +344,8 @@ public class MainModel {
             if(insertInto(addedRow)){
                 useInsert=false;
                 addedRow.clear();
-                mainController.addRow.setDisable(false);
-                mainController.addRowButton.setDisable(false);
+                mainController.getAddRow().setDisable(false);
+                mainController.getAddRowButton().setDisable(false);
                 openSuccessAddingAlert(mainController.tableDBTableView.getItems().size());
             }else{
                 addedRow=newRow;
@@ -366,7 +365,7 @@ public class MainModel {
             newNumberPage++;
         }
         mainController.setNumberPage(newNumberPage);
-        mainController.numberRowTextField.setText(String.valueOf(newNumberPage));
+        mainController.getNumberRowTextField().setText(String.valueOf(newNumberPage));
         removeRow(oldNumberPage);
     }
     public void addPage(){
@@ -798,7 +797,7 @@ public class MainModel {
         }
         builderDeleteReq.append(";");
         mainController.setNumberPage(0);
-        mainController.numberRowTextField.setText(String.valueOf(mainController.getNumberPage()));
+        mainController.getNumberRowTextField().setText(String.valueOf(mainController.getNumberPage()));
         sendRequest(builderDeleteReq.toString(),true);
     }
     public void deleteAllRows(){

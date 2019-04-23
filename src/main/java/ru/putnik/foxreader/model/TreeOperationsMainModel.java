@@ -12,7 +12,6 @@ import ru.putnik.foxreader.TypeTreeElement;
 import ru.putnik.foxreader.controller.MainController;
 
 import java.sql.*;
-import java.util.Arrays;
 import java.util.Optional;
 
 import static ru.putnik.foxreader.FLogger.*;

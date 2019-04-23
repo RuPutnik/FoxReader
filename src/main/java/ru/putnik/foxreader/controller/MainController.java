@@ -52,50 +52,47 @@ public class MainController extends Application implements Initializable {
     @FXML
     public TableView<List<String>> tableDBTableView;
     @FXML
-    public CheckBox modeRealSQLCheckBox;
+    private CheckBox modeRealSQLCheckBox;
     @FXML
-    public TextField textRequestTextField;
+    private TextField textRequestTextField;
     @FXML
-    public Button sendRequestButton;
+    private Button sendRequestButton;
     @FXML
-    public Button editInWindowButton;
+    private Button editInWindowButton;
     @FXML
-    public MenuItem addRow;
+    private MenuItem addRow;
     @FXML
-    public MenuItem deleteRow;
+    private MenuItem deleteRow;
     @FXML
-    public MenuItem updateTable;
+    private MenuItem updateTable;
     @FXML
-    public MenuItem deleteAllRows;
+    private MenuItem deleteAllRows;
     @FXML
-    public GridPane rowGridPane;
+    private GridPane rowGridPane;
     @FXML
-    public Button saveRowButton;
+    private Button saveRowButton;
     @FXML
-    public Button addRowButton;
+    private Button addRowButton;
     @FXML
-    public Button deleteRowButton;
+    private Button deleteRowButton;
     @FXML
-    public Button updateButton;
+    private Button updateButton;
     @FXML
-    public Button deleteAllRowButton;
+    private Button deleteAllRowButton;
     @FXML
-    public Button firstRowButton;
+    private Button firstRowButton;
     @FXML
-    public Button lastRowButton;
+    private Button lastRowButton;
     @FXML
-    public Button nextRowButton;
+    private Button nextRowButton;
     @FXML
-    public Button backRowButton;
+    private Button backRowButton;
     @FXML
-    public Label countAllRowLabel;
+    private Label countAllRowLabel;
     @FXML
-    public TextField numberRowTextField;
+    private TextField numberRowTextField;
     @FXML
-    public Button goToRowButton;
-    @FXML
-    public ScrollPane scrollPane;
-
+    private Button goToRowButton;
     @Override
     public void start(Stage primaryStage) throws Exception {
         stage=primaryStage;
@@ -108,7 +105,7 @@ public class MainController extends Application implements Initializable {
         }catch (IllegalArgumentException ex){
             System.out.println("Не обнаружена иконка программы!");
         }
-        primaryStage.setResizable(false);
+        //primaryStage.setResizable(false);
         primaryStage.show();
     }
 
@@ -467,5 +464,25 @@ public class MainController extends Application implements Initializable {
 
     public int getNumberPage(){
         return numberPage;
+    }
+
+    public TextField getNumberRowTextField() {
+        return numberRowTextField;
+    }
+
+    public Label getCountAllRowLabel() {
+        return countAllRowLabel;
+    }
+
+    public Button getAddRowButton() {
+        return addRowButton;
+    }
+
+    public MenuItem getAddRow() {
+        return addRow;
+    }
+
+    public GridPane getRowGridPane() {
+        return rowGridPane;
     }
 }
