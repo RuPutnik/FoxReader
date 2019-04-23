@@ -9,6 +9,7 @@
 <?import javafx.scene.control.MenuBar?>
 <?import javafx.scene.control.MenuItem?>
 <?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.SplitPane?>
 <?import javafx.scene.control.Tab?>
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TableView?>
@@ -22,8 +23,7 @@
 <?import javafx.scene.layout.RowConstraints?>
 <?import javafx.scene.layout.VBox?>
 
-<?import javafx.scene.control.SplitPane?>
-<BorderPane prefHeight="650.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.putnik.foxreader.controller.MainController">
+<BorderPane prefHeight="649.0" prefWidth="1000.0" xmlns="http://javafx.com/javafx/8.0.121" xmlns:fx="http://javafx.com/fxml/1" fx:controller="ru.putnik.foxreader.controller.MainController">
     <top>
         <MenuBar>
             <Menu text="Подключение">
@@ -34,20 +34,20 @@
         </MenuBar>
     </top>
     <center>
-        <VBox spacing="10">
-            <HBox spacing="10">
+        <VBox spacing="10" >
+            <HBox spacing="10" prefHeight="5000">
                 <SplitPane dividerPositions="0.3" style="-fx-box-border: transparent;">
                 <VBox prefHeight="551.0" spacing="10">
-                    <VBox alignment="CENTER_LEFT" prefHeight="360.0" prefWidth="367.0" spacing="5">
+                    <VBox alignment="CENTER_LEFT" prefHeight="360.0" spacing="5">
                         <Label text="Иерархия сервера SQL" />
-                        <TreeView fx:id="treeDBTreeView" minHeight="-Infinity" minWidth="-Infinity" prefHeight="338.0" prefWidth="210.0" />
+                        <TreeView fx:id="treeDBTreeView" minHeight="-Infinity" minWidth="-Infinity" prefHeight="338.0" />
                     </VBox>
-                    <TextArea fx:id="logRequestTextArea" editable="false" promptText="Выполненные запросы" />
+                    <TextArea fx:id="logRequestTextArea" editable="false" promptText="Выполненные запросы" prefHeight="5000"/>
                 </VBox>
-                <TabPane prefHeight="543.0">
+                <TabPane prefWidth="5000">
                     <tabs>
                         <Tab closable="false" text="Табличный вид">
-                            <TableView fx:id="tableDBTableView" maxWidth="Infinity" prefHeight="470.0" prefWidth="875.0">
+                            <TableView fx:id="tableDBTableView" prefHeight="470.0" prefWidth="875.0">
                                 <contextMenu>
                                     <ContextMenu>
                                         <items>
@@ -61,18 +61,18 @@
                             </TableView>
                         </Tab>
                         <Tab closable="false" text="Ленточный вид">
-                            <VBox alignment="CENTER" spacing="10.0">
-                                <HBox alignment="CENTER_RIGHT" spacing="10">
-                                    <Label text="Общее количество записей:"/>
+                            <VBox alignment="CENTER" spacing="10.0" prefHeight="5000">
+                                <HBox alignment="TOP_RIGHT" spacing="10">
+                                    <Label text="Общее количество записей:" />
                                     <Label fx:id="countAllRowLabel" text="Неизвестно" />
                                     <Label text="Номер текущей записи:" />
-                                    <TextField fx:id="numberRowTextField" disable="true" promptText="Введите номер записи"/>
+                                    <TextField fx:id="numberRowTextField" disable="true" promptText="Введите номер записи" />
                                     <Button fx:id="goToRowButton" disable="true" text="Перейти" />
                                     <padding>
                                         <Insets right="5" top="5" />
                                     </padding>
                                 </HBox>
-                                <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="ALWAYS" prefHeight="375.0" prefWidth="624.0">
+                                <ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="ALWAYS" prefHeight="5000" prefWidth="624.0">
                                     <GridPane fx:id="rowGridPane" alignment="CENTER" hgap="50" prefHeight="393.0" prefWidth="586.0" vgap="10">
                                         <columnConstraints>
                                             <ColumnConstraints halignment="CENTER" hgrow="SOMETIMES" />
@@ -122,16 +122,19 @@
             </HBox>
 
             <padding>
-                <Insets bottom="10" left="10" right="10" top="10" />
+                <Insets bottom="20" left="10" right="10" top="10" />
             </padding>
         </VBox>
     </center>
    <bottom>
-         <HBox alignment="TOP_CENTER" spacing="10" BorderPane.alignment="BASELINE_CENTER">
+         <HBox alignment="TOP_CENTER" spacing="10" BorderPane.alignment="CENTER">
              <CheckBox fx:id="modeRealSQLCheckBox" disable="true" selected="true" text="Режим реального SQL" />
              <TextField fx:id="textRequestTextField" minWidth="400" prefHeight="25.0" prefWidth="400.0" promptText="Введите SQL запрос" />
              <Button fx:id="sendRequestButton" disable="true" text="Обработать" />
              <Button fx:id="editInWindowButton" disable="true" text="Ввести в окне" />
+             <padding>
+                 <Insets bottom="15"/>
+             </padding>
          </HBox>
    </bottom>
 </BorderPane>

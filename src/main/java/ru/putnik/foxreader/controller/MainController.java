@@ -105,7 +105,6 @@ public class MainController extends Application implements Initializable {
         }catch (IllegalArgumentException ex){
             System.out.println("Не обнаружена иконка программы!");
         }
-        //primaryStage.setResizable(false);
         primaryStage.show();
     }
 
