@@ -1,13 +1,17 @@
 package ru.putnik.foxreader.model;
 
 import javafx.geometry.HPos;
+import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import ru.putnik.foxreader.FLogger;
+import ru.putnik.foxreader.ImageLoader;
 import ru.putnik.foxreader.TypeTreeElement;
 import ru.putnik.foxreader.controller.MainController;
 
@@ -64,7 +68,24 @@ public class TreeOperationsMainModel {
         }
     }
     public void addDB(TreeItem<TypeTreeElement> item){
-        System.out.println("Создать базу данных: "+item.getValue().getName());
+        String nameNewDatabase=getNameNewDB();
+        if(nameNewDatabase!=null){
+            String request="CREATE DATABASE "+nameNewDatabase;
+            TreeItem<TypeTreeElement> newDBElement=new TreeItem<>();
+            newDBElement.setValue(new TypeTreeElement(TypeTreeElement.Type.DATABASE,nameNewDatabase,nameNewDatabase,null,null));
+            newDBElement.setGraphic(new ImageView(ImageLoader.getBase()));
+            try (PreparedStatement ps = model.getConnection().prepareStatement(request)){
+                ps.execute();
+                item.getChildren().add(newDBElement);
+                showSuccessAdding(newDBElement);
+                controller.logRequestTextArea.appendText(request);
+                FLogger.request(request);
+            } catch (SQLException e) {
+                showErrorAdding(newDBElement,e);
+                FLogger.error("Ошибка при создании объекта "+newDBElement.getValue().getName(),e);
+            }
+        }
+
     }
     public void removeProcedure(TreeItem<TypeTreeElement> item){
         if(showWarningDeletion(item)){
@@ -81,6 +102,41 @@ public class TreeOperationsMainModel {
                 FLogger.error("Ошибка в процессе удаления объекта "+item.getValue().getName(),e);
             }
         }
+    }
+    public void seeProcedure(TreeItem<TypeTreeElement> item){
+        String request;
+        request="USE "+item.getValue().getNameDB()+";";
+        request=request+"EXEC sp_helptext '"+item.getValue().getName()+"';";
+        try (PreparedStatement ps = model.getConnection().prepareStatement(request)){
+            ResultSet procedureCode=ps.executeQuery();
+            StringBuilder code=new StringBuilder();
+            while (procedureCode.next()){
+                code.append(procedureCode.getString(1)).append("\n");
+            }
+            Alert successDeletion=new Alert(Alert.AlertType.INFORMATION);
+            successDeletion.setTitle("Просмотр процедуры "+item.getValue().getName());
+            successDeletion.setHeaderText("Просмотр кода хранимой процедуры");
+            VBox vBox=new VBox();
+            vBox.setPadding(new Insets(5,10,5,10));
+            TextArea textCode=new TextArea(code.toString());
+            textCode.setEditable(false);
+            vBox.getChildren().add(textCode);
+            successDeletion.getDialogPane().setContent(vBox);
+            ((Stage)successDeletion.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+            successDeletion.show();
+
+            controller.logRequestTextArea.appendText(request);
+            FLogger.request(request);
+        } catch (SQLException e) {
+            Alert errorRead=new Alert(Alert.AlertType.ERROR);
+            errorRead.setTitle("Ошибка при просмотре процедуры");
+            errorRead.setHeaderText(null);
+            errorRead.setContentText("При попытке чтения кода процедуры возникла ошибка:\n"+e.getLocalizedMessage());
+            ((Stage)errorRead.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+            errorRead.show();
+            FLogger.error("Ошибка при чтении кода процедуры "+item.getValue().getName(),e);
+        }
+
     }
     public void addProcedure(TreeItem<TypeTreeElement> item){
         System.out.println("Создать процедуру: "+item.getParent().getValue().getName());
@@ -292,19 +348,55 @@ public class TreeOperationsMainModel {
         }
     }
     private void showSuccessDeleting(TreeItem<TypeTreeElement> item){
-        Alert warningDeletion=new Alert(Alert.AlertType.INFORMATION);
-        warningDeletion.setTitle("Успешное удаление");
-        warningDeletion.setHeaderText(null);
-        warningDeletion.setContentText("Вы успешно удалили "+item.getValue().getType().toString()+" под названием "+item.getValue().getName());
-        ((Stage)warningDeletion.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
-        warningDeletion.show();
+        Alert successDeletion=new Alert(Alert.AlertType.INFORMATION);
+        successDeletion.setTitle("Успешное удаление");
+        successDeletion.setHeaderText(null);
+        successDeletion.setContentText("Вы успешно удалили "+item.getValue().getType().toString()+" под названием "+item.getValue().getName());
+        ((Stage)successDeletion.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+        successDeletion.show();
     }
     private void showErrorDeleting(TreeItem<TypeTreeElement> item,SQLException ex){
-        Alert warningDeletion=new Alert(Alert.AlertType.ERROR);
-        warningDeletion.setTitle("Ошибка удаления");
-        warningDeletion.setHeaderText(null);
-        warningDeletion.setContentText("В процессе удаления "+item.getValue().getType().toString()+" под названием "+item.getValue().getName()+"\nвозникла ошибка: "+ex.getLocalizedMessage());
-        ((Stage)warningDeletion.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
-        warningDeletion.show();
+        Alert errorDeletion=new Alert(Alert.AlertType.ERROR);
+        errorDeletion.setTitle("Ошибка удаления");
+        errorDeletion.setHeaderText(null);
+        errorDeletion.setContentText("В процессе удаления "+item.getValue().getType().toString()+" под названием "+item.getValue().getName()+"\nвозникла ошибка: "+ex.getLocalizedMessage());
+        ((Stage)errorDeletion.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+        errorDeletion.show();
+    }
+    private void showSuccessAdding(TreeItem<TypeTreeElement> item){
+        Alert successAdding=new Alert(Alert.AlertType.INFORMATION);
+        successAdding.setTitle("Успешное ооздание");
+        successAdding.setHeaderText(null);
+        successAdding.setContentText("Вы успешно создали "+item.getValue().getType().toString()+" под названием "+item.getValue().getName());
+        ((Stage)successAdding.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+        successAdding.show();
+    }
+    private void showErrorAdding(TreeItem<TypeTreeElement> item,SQLException ex){
+        Alert errorAdding=new Alert(Alert.AlertType.ERROR);
+        errorAdding.setTitle("Ошибка создания");
+        errorAdding.setHeaderText(null);
+        errorAdding.setContentText("В процессе создания "+item.getValue().getType().toString()+" под названием "+item.getValue().getName()+"\nвозникла ошибка: "+ex.getLocalizedMessage());
+        ((Stage)errorAdding.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+        errorAdding.show();
+    }
+    private String getNameNewDB(){
+        String name=null;
+
+        Alert nameDb=new Alert(Alert.AlertType.CONFIRMATION);
+        nameDb.setTitle("Создание базы данных");
+        nameDb.setHeaderText("Придумайте уникальное название для новой базы данных");
+        ((Stage)nameDb.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+        VBox box=new VBox();
+        box.setPadding(new Insets(5,10,0,10));
+        TextField nameDbField=new TextField();
+        box.getChildren().add(nameDbField);
+        nameDbField.setPromptText("Введите название");
+        nameDb.getDialogPane().setContent(box);
+        Optional<ButtonType> optional=nameDb.showAndWait();
+
+        if(optional.get()==ButtonType.OK){
+            name=nameDbField.getText();
+        }
+        return name;
     }
 }

@@ -206,18 +206,25 @@ public class MainController extends Application implements Initializable {
                     addTable.getItems().add(addTableItem);
                     treeDBTreeView.setContextMenu(addTable);
                 }else if(newValue.getValue().getType() == TypeTreeElement.Type.PROCEDURE){
-                    MenuItem deleteProcedureItem=new MenuItem("Удалить хранимую процедуру");
                     MenuItem runProcedureItem=new MenuItem("Запустить хранимую процедуру");
-                    deleteProcedureItem.setOnAction(event -> {
-                        operationsMainModel.removeProcedure(newValue);
-                    });
+                    MenuItem seeProcedureItem=new MenuItem("Просмотреть хранимую процедуру");
+                    MenuItem deleteProcedureItem=new MenuItem("Удалить хранимую процедуру");
+
                     runProcedureItem.setOnAction(event -> {
                         operationsMainModel.executeProcedure(newValue);
                     });
-                    ContextMenu removeProcedure=new ContextMenu();
-                    removeProcedure.getItems().add(runProcedureItem);
-                    removeProcedure.getItems().add(deleteProcedureItem);
-                    treeDBTreeView.setContextMenu(removeProcedure);
+                    seeProcedureItem.setOnAction(event -> {
+                        operationsMainModel.seeProcedure(newValue);
+                    });
+                    deleteProcedureItem.setOnAction(event -> {
+                        operationsMainModel.removeProcedure(newValue);
+                    });
+
+                    ContextMenu procedureMenu=new ContextMenu();
+                    procedureMenu.getItems().add(runProcedureItem);
+                    procedureMenu.getItems().add(seeProcedureItem);
+                    procedureMenu.getItems().add(deleteProcedureItem);
+                    treeDBTreeView.setContextMenu(procedureMenu);
                 }else if(newValue.getValue().getType() == TypeTreeElement.Type.PROCEDURES){
                     MenuItem addProcedureItem=new MenuItem("Создать хранимую процедуру");
                     addProcedureItem.setOnAction(event -> {
