@@ -1,5 +1,9 @@
 package ru.putnik.foxreader.model;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+import javafx.collections.ObservableListBase;
+import javafx.fxml.FXMLLoader;
 import javafx.geometry.HPos;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
@@ -8,6 +12,7 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.stage.Stage;
 import ru.putnik.foxreader.FLogger;
@@ -16,6 +21,9 @@ import ru.putnik.foxreader.TypeTreeElement;
 import ru.putnik.foxreader.controller.MainController;
 
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 import static ru.putnik.foxreader.FLogger.*;
@@ -48,8 +56,160 @@ public class TreeOperationsMainModel {
         }
 
     }
-    public void addTable(TreeItem<TypeTreeElement> item){
-        System.out.println("Создать таблицу: "+item.getParent().getValue().getName());
+    public void addTable(TreeItem<TypeTreeElement> item) {
+        String request = "USE "+item.getValue().getNameDB()+"; CREATE TABLE dbo.";
+
+        Alert addingTable = new Alert(Alert.AlertType.CONFIRMATION);
+        addingTable.setTitle("Создание таблицы");
+        addingTable.setHeaderText("Создание новой таблицы");
+        ArrayList<HBox> columns=new ArrayList<>();
+        ArrayList<TextField> names=new ArrayList<>();
+        ArrayList<ComboBox> types=new ArrayList<>();
+        ArrayList<CheckBox> notNulles=new ArrayList<>();
+        VBox vBox = new VBox();
+        vBox.setPadding(new Insets(5, 10, 5, 10));
+        vBox.setSpacing(15);
+        VBox columnsListBox=new VBox();
+        columnsListBox.setAlignment(Pos.CENTER);
+        columnsListBox.setSpacing(5);
+        HBox columnBox=new HBox();
+
+        TextField nameColumn=new TextField();
+        nameColumn.setPromptText("Имя столбца");
+        names.add(nameColumn);
+        ObservableList<String> list=FXCollections.observableArrayList();
+        list.add("int");
+        list.add("bigint");
+        list.add("bit");
+        list.add("float");
+        list.add("date");
+        list.add("time(7)");
+        list.add("datetime");
+        list.add("char(10)");
+        list.add("nchar(10)");
+        list.add("binary(50)");
+        list.add("varchar(50)");
+        ComboBox<String> typeCBox=new ComboBox<>(list);
+        typeCBox.setValue("Тип данных");
+        types.add(typeCBox);
+        notNulles.add(new CheckBox("NOT NULL"));
+        columnBox.setAlignment(Pos.CENTER);
+        columnBox.setSpacing(5);
+        columnBox.getChildren().add(names.get(0));
+        columnBox.getChildren().add(types.get(0));
+        columnBox.getChildren().add(notNulles.get(0));
+        columns.add(columnBox);
+        TextField name = new TextField();
+        name.setPromptText("Введите имя новой таблицы");
+
+        HBox primaryKeyInstall=new HBox();
+        TextField nameColumnKey=new TextField();
+        nameColumnKey.setPrefWidth(100);
+        primaryKeyInstall.setSpacing(5);
+        primaryKeyInstall.setAlignment(Pos.CENTER);
+        Button newColumn=new Button("Добавить столбец");
+        newColumn.setOnAction(event -> {
+            HBox columnNew=new HBox();
+
+            TextField nameNew=new TextField();
+            nameNew.setPromptText("Имя столбца");
+            names.add(nameNew);
+
+            ObservableList<String> listTypes=FXCollections.observableArrayList();
+            listTypes.add("int");
+            listTypes.add("bigint");
+            listTypes.add("bit");
+            listTypes.add("float");
+            listTypes.add("date");
+            listTypes.add("time(7)");
+            listTypes.add("datetime");
+            listTypes.add("char(10)");
+            listTypes.add("nchar(10)");
+            listTypes.add("binary(50)");
+            listTypes.add("varchar(50)");
+
+            ComboBox<String> typeColumnCBox=new ComboBox<>(list);
+            typeColumnCBox.setValue("Тип данных");
+            types.add(typeColumnCBox);
+
+            notNulles.add(new CheckBox("NOT NULL"));
+            columnNew.setAlignment(Pos.CENTER);
+            columnNew.setSpacing(5);
+            columnNew.getChildren().add(names.get(names.size()-1));
+            columnNew.getChildren().add(types.get(types.size()-1));
+            columnNew.getChildren().add(notNulles.get(notNulles.size()-1));
+
+            columns.add(columnNew);
+            columnsListBox.getChildren().clear();
+            for(HBox box:columns){
+                columnsListBox.getChildren().add(box);
+            }
+            if(addingTable.getHeight()<400) {
+                addingTable.setHeight(addingTable.getHeight() + 30);
+            }
+        });
+        primaryKeyInstall.getChildren().add(newColumn);
+        primaryKeyInstall.getChildren().add(new Label("Primary key:"));
+        primaryKeyInstall.getChildren().add(nameColumnKey);
+
+        vBox.getChildren().add(name);
+        for(HBox box:columns){
+            columnsListBox.getChildren().add(box);
+        }
+        vBox.getChildren().add(columnsListBox);
+        vBox.getChildren().add(primaryKeyInstall);
+        addingTable.getDialogPane().setContent(new ScrollPane(vBox));
+        ((Stage) addingTable.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+        Optional<ButtonType> optional = addingTable.showAndWait();
+
+        if (optional.get() == ButtonType.OK) {
+            request=request+nameColumn.getText();
+            request=createAddTableRequest(request,names,types,notNulles,nameColumnKey.getText());
+            TreeItem<TypeTreeElement> newTable = new TreeItem<>();
+            try {
+                newTable.setValue(new TypeTreeElement(TypeTreeElement.Type.TABLE, name.getText(), item.getValue().getNameDB(), name.getText(), "dbo"));
+                newTable.setGraphic(new ImageView(ImageLoader.getTable()));
+                if (name.getText().equals("")) {
+                    throw new SQLException("Не указано имя новой таблицы");
+                }
+
+                PreparedStatement ps = model.getConnection().prepareStatement(request);
+                ps.execute();
+                item.getChildren().add(newTable);
+                showSuccessAdding(newTable);
+                FLogger.request(request);
+                controller.logRequestTextArea.appendText(request);
+        }catch(SQLException ex){
+            showErrorAdding(newTable,ex);
+            FLogger.error("Ошибка в процессе создания таблицы " + item.getValue().getName(), ex);
+        }
+    }
+    }
+    private String createAddTableRequest(String startRequest,ArrayList<TextField> names,ArrayList<ComboBox> types,ArrayList<CheckBox> notNull,String primaryKey){
+        startRequest=startRequest+"(";
+        String primaryKeyName="";
+        StringBuilder builder=new StringBuilder(startRequest);
+        if(!primaryKey.trim().equals("")){
+            primaryKeyName=primaryKey.trim();
+        }
+
+        for(int n=0;n<names.size();n++){
+            if(!names.get(n).getText().trim().equals("")&&!types.get(n).getSelectionModel().getSelectedItem().toString().equals("Тип данных")){
+                builder.append(names.get(n).getText()).append(" ").append(types.get(n).getSelectionModel().getSelectedItem().toString());
+                if(names.get(n).getText().trim().equals(primaryKeyName)){
+                    builder.append(" PRIMARY KEY");
+                }
+                if(notNull.get(n).isSelected()) {
+                    builder.append(" NOT NULL");
+                }
+                builder.append(", ");
+            }
+        }
+        builder.setLength(builder.length()-2);
+
+        startRequest=builder.toString();
+        startRequest=startRequest+")";
+        return startRequest;
     }
     public void removeDB(TreeItem<TypeTreeElement> item){
         if(showWarningDeletion(item)){
@@ -139,7 +299,47 @@ public class TreeOperationsMainModel {
 
     }
     public void addProcedure(TreeItem<TypeTreeElement> item){
-        System.out.println("Создать процедуру: "+item.getParent().getValue().getName());
+        String request="";
+        Alert successDeletion=new Alert(Alert.AlertType.CONFIRMATION);
+        successDeletion.setTitle("Создание процедуры");
+        successDeletion.setHeaderText("Запись кода хранимой процедуры");
+        VBox vBox=new VBox();
+        vBox.setPadding(new Insets(5,10,5,10));
+        vBox.setSpacing(10);
+        TextArea textCode=new TextArea();
+        textCode.setPromptText("Введите код процедуры, начиная со слов CREATE PROCEDURE, используя тип dbo перед именем процедуры");
+        TextField name=new TextField();
+        name.setPromptText("Введите имя новой процедуры");
+        vBox.getChildren().add(name);
+        vBox.getChildren().add(textCode);
+        successDeletion.getDialogPane().setContent(vBox);
+        ((Stage)successDeletion.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
+        Optional<ButtonType> optional=successDeletion.showAndWait();
+
+        if(optional.get()==ButtonType.OK) {
+            TreeItem<TypeTreeElement> newProcedure = new TreeItem<>();
+            newProcedure.setValue(new TypeTreeElement(TypeTreeElement.Type.PROCEDURE, name.getText().trim(), item.getValue().getNameDB(), null, null));
+            newProcedure.setGraphic(new ImageView(ImageLoader.getProcedure()));
+            try {
+            if(name.getText().equals("")) {
+                throw new SQLException("Не указано имя новой процедуры");
+            }else if(textCode.getText().equals("")){
+                throw new SQLException("Не указано тело новой процедуры");
+            }
+
+            request=request+textCode.getText();
+            PreparedStatement ps = model.getConnection().prepareStatement(request);
+                ps.execute();
+                item.getChildren().add(newProcedure);
+                showSuccessAdding(newProcedure);
+                FLogger.request(request);
+                controller.logRequestTextArea.appendText(request);
+            } catch (SQLException e) {
+                showErrorAdding(newProcedure, e);
+                FLogger.error("Ошибка при создании процедуры " + newProcedure.getValue().getName(), e);
+            }
+        }
+
     }
     public void executeProcedure(TreeItem<TypeTreeElement> item){
         try {

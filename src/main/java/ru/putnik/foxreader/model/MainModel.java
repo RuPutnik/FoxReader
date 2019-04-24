@@ -532,15 +532,16 @@ public class MainModel {
             String nameForeignKey="";
 
             while (set.next()){
+
                 if(namePrimaryKey.equals("")){
                     namePrimaryKey=namePrimaryKey+set.getString("PK_NAME");
+
                     TreeItem<TypeTreeElement> primaryKey = new TreeItem<>();
                     primaryKey.setValue(new TypeTreeElement(Type.PRIMARY_KEY, namePrimaryKey, keysItem.getValue().getNameDB(),keysItem.getValue().getNameTable(), ""));
                     primaryKey.setGraphic(new ImageView(ImageLoader.getPrimaryKey()));
                     keysItem.getChildren().add(primaryKey);
                 }
                 nameForeignKey=nameForeignKey+set.getString("FK_NAME");
-
                 TreeItem<TypeTreeElement> foreignKey=new TreeItem<>();
                 foreignKey.setValue(new TypeTreeElement(Type.FOREIGN_KEY,nameForeignKey,keysItem.getValue().getNameDB(),keysItem.getValue().getNameTable(),""));
                 foreignKey.setGraphic(new ImageView(ImageLoader.getForeignKey()));
