@@ -113,7 +113,7 @@ public class MainModel {
             }
 
             rootItem.setExpanded(true);
-            mainController.treeDBTreeView.setRoot(rootItem);
+            mainController.getTreeDBTreeView().setRoot(rootItem);
         }
     }
     public void firstFillTable(String nameTable,String db,String schema){
@@ -131,7 +131,7 @@ public class MainModel {
             selectedDB=db;
             selectedTable=nameTable;
             selectedSchema=schema;
-            mainController.logRequestTextArea.appendText(request+"\n");
+            mainController.getLogRequestTextArea().appendText(request+"\n");
         } catch (SQLException e) {
             e.printStackTrace();
             error("Ошибка при загрузке таблицы ",e);
@@ -139,7 +139,7 @@ public class MainModel {
     }
     private void fillTable(PreparedStatement statement) throws SQLException{
         ResultSet data=statement.executeQuery();
-        mainController.tableDBTableView.getColumns().clear();
+        mainController.getTableDBTableView().getColumns().clear();
         columnNames.clear();
         fullColumnNames.clear();
         ObservableList<List<String>> listColumns = FXCollections.observableArrayList();
@@ -218,11 +218,11 @@ public class MainModel {
                         if(insertInto(addedRow)){
                             useInsert = false;
                             addedRow.clear();
-                            openSuccessAddingAlert(mainController.tableDBTableView.getItems().size());
+                            openSuccessAddingAlert(mainController.getTableDBTableView().getItems().size());
                             mainController.getAddRowButton().setDisable(false);
                             mainController.getAddRow().setDisable(false);
                         }else{
-                            mainController.tableDBTableView.getItems().add(addedRow);
+                            mainController.getTableDBTableView().getItems().add(addedRow);
                         }
                     } else {
                         updateRow(event.getTablePosition().getColumn(), event.getNewValue(), event.getRowValue());
@@ -237,14 +237,14 @@ public class MainModel {
                 }
             });
             //Загружаем столбец в таблицу
-            mainController.tableDBTableView.getColumns().add(column);
+            mainController.getTableDBTableView().getColumns().add(column);
         }
-        mainController.tableDBTableView.setItems(listColumns);//Загружаем данные в таблицу
+        mainController.getTableDBTableView().setItems(listColumns);//Загружаем данные в таблицу
         fillRibbonPane();//Загружаем данные в ленточное отображение
     }
     private void fillRibbonPane(){
         createGraphicStructurePane();
-        mainController.getCountAllRowLabel().setText(String.valueOf(mainController.tableDBTableView.getItems().size()));
+        mainController.getCountAllRowLabel().setText(String.valueOf(mainController.getTableDBTableView().getItems().size()));
         openPage(mainController.getNumberPage());
     }
     private void createGraphicStructurePane(){
@@ -281,7 +281,7 @@ public class MainModel {
         }
         for(int b=0;b<namesColumn.length;b++) {
             mainController.getRowGridPane().add(namesColumn[b],0,b);
-            if(mainController.tableDBTableView.getItems().size()!=0) {
+            if(mainController.getTableDBTableView().getItems().size()!=0) {
                 if (fullColumnNames.get(b).split(": ")[1].equals("bit")) {
                     mainController.getRowGridPane().add(checkBoxes[c], 1, b);
                     c++;
@@ -292,19 +292,19 @@ public class MainModel {
         }
     }
     public void openPage(int numberPage){
-        if(mainController.tableDBTableView.getItems().size()>0){
+        if(mainController.getTableDBTableView().getItems().size()>0){
             int c=0;
             int d=0;
             for(int a=0;a<fullColumnNames.size();a++){
                 if(!fullColumnNames.get(a).split(": ")[1].equals("bit")){
-                    fields[c].setText(mainController.tableDBTableView.getItems().get(numberPage).get(a));
+                    fields[c].setText(mainController.getTableDBTableView().getItems().get(numberPage).get(a));
                     c++;
                 }
             }
             for(int a=0;a<fullColumnNames.size();a++){
                 if(fullColumnNames.get(a).split(": ")[1].equals("bit")){
                     boolean isSelected;
-                    isSelected = mainController.tableDBTableView.getItems().get(numberPage).get(a).equals("1");
+                    isSelected = mainController.getTableDBTableView().getItems().get(numberPage).get(a).equals("1");
                     checkBoxes[d].setSelected(isSelected);
                     d++;
                 }
@@ -313,7 +313,7 @@ public class MainModel {
     }
     public void savePage(){
         ArrayList<String> newRow=new ArrayList<>();
-        List<String> oldRow=mainController.tableDBTableView.getItems().get(mainController.getNumberPage());
+        List<String> oldRow=mainController.getTableDBTableView().getItems().get(mainController.getNumberPage());
         String updateValue="";
         int updateNumberColumn=0;
         int c=0;
@@ -346,11 +346,11 @@ public class MainModel {
                 addedRow.clear();
                 mainController.getAddRow().setDisable(false);
                 mainController.getAddRowButton().setDisable(false);
-                openSuccessAddingAlert(mainController.tableDBTableView.getItems().size());
+                openSuccessAddingAlert(mainController.getTableDBTableView().getItems().size());
             }else{
                 addedRow=newRow;
-                mainController.tableDBTableView.getItems().add(addedRow);
-                openPage(mainController.tableDBTableView.getItems().size()-1);
+                mainController.getTableDBTableView().getItems().add(addedRow);
+                openPage(mainController.getTableDBTableView().getItems().size()-1);
             }
         }else {
             updateRow(updateNumberColumn, updateValue, oldRow);
@@ -393,7 +393,7 @@ public class MainModel {
                 addedRow.add("NULL");
             }
         }
-        mainController.tableDBTableView.getItems().add(newRow);
+        mainController.getTableDBTableView().getItems().add(newRow);
         useInsert=true;
     }
     private void addingTablesInTree(TreeItem<TypeTreeElement> database){
@@ -527,7 +527,7 @@ public class MainModel {
     }
     private void addingKeys(TreeItem<TypeTreeElement> keysItem){
         try {
-            ResultSet set=connection.getMetaData().getExportedKeys(keysItem.getValue().getNameDB(),keysItem.getValue().getSchema(),keysItem.getValue().getNameTable());
+            ResultSet set=connection.getMetaData().getImportedKeys(keysItem.getValue().getNameDB(),keysItem.getValue().getSchema(),keysItem.getValue().getNameTable());
             String namePrimaryKey;
             String nameForeignKey;
             ResultSet set1=connection.getMetaData().getPrimaryKeys(keysItem.getValue().getNameDB(),keysItem.getValue().getSchema(),keysItem.getValue().getNameTable());
@@ -739,7 +739,7 @@ public class MainModel {
                 }else {
                     fillTable(connection.prepareStatement(textReq));
                 }
-                mainController.logRequestTextArea.appendText(textReq + "\n");
+                mainController.getLogRequestTextArea().appendText(textReq + "\n");
                 request("Запрос "+textReq);
             }
         } catch (SQLException e) {
@@ -766,7 +766,7 @@ public class MainModel {
             sqlReq=sqlReq+" SELECT * FROM ["+selectedTable+"] WHERE ";
             sqlReq=sqlReq+filter+";";
             sendRequest(sqlReq,false);
-            mainController.logRequestTextArea.appendText(sqlReq+"\n");
+            mainController.getLogRequestTextArea().appendText(sqlReq+"\n");
         }
     }
     private String getNameTableConnect(ConnectionProperty property){
@@ -781,7 +781,7 @@ public class MainModel {
         return nameDB;
     }
     public void removeRow(int indexRow){
-        List<String> row=mainController.tableDBTableView.getItems().get(indexRow);
+        List<String> row=mainController.getTableDBTableView().getItems().get(indexRow);
         StringBuilder builderDeleteReq=new StringBuilder();
         builderDeleteReq.append("DELETE FROM [");
         builderDeleteReq.append(selectedTable);
@@ -824,7 +824,7 @@ public class MainModel {
                 addedRow.add("NULL");
             }
         }
-        mainController.tableDBTableView.getItems().add(newRow);
+        mainController.getTableDBTableView().getItems().add(newRow);
         useInsert=true;
     }
     public void updateTable(){

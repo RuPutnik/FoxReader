@@ -44,7 +44,7 @@ public class TreeOperationsMainModel {
             try (PreparedStatement ps = model.getConnection().prepareStatement(req)){
                 ps.execute();
                 item.getParent().getChildren().remove(item);
-                controller.logRequestTextArea.appendText(req);
+                controller.getLogRequestTextArea().appendText(req);
                 showSuccessDeleting(item);
                 FLogger.request(req);
             } catch (SQLException e) {
@@ -176,7 +176,7 @@ public class TreeOperationsMainModel {
                 item.getChildren().add(newTable);
                 showSuccessAdding(newTable);
                 FLogger.request(request);
-                controller.logRequestTextArea.appendText(request);
+                controller.getLogRequestTextArea().appendText(request);
         }catch(SQLException ex){
             showErrorAdding(newTable,ex);
             FLogger.error("Ошибка в процессе создания таблицы " + item.getValue().getName(), ex);
@@ -217,7 +217,7 @@ public class TreeOperationsMainModel {
                 ps.execute();
                 item.getParent().getChildren().remove(item);
                 FLogger.request(req);
-                controller.logRequestTextArea.appendText(req);
+                controller.getLogRequestTextArea().appendText(req);
                 showSuccessDeleting(item);
             } catch (SQLException e) {
                 showErrorDeleting(item,e);
@@ -236,7 +236,7 @@ public class TreeOperationsMainModel {
                 ps.execute();
                 item.getChildren().add(newDBElement);
                 showSuccessAdding(newDBElement);
-                controller.logRequestTextArea.appendText(request);
+                controller.getLogRequestTextArea().appendText(request);
                 FLogger.request(request);
             } catch (SQLException e) {
                 showErrorAdding(newDBElement,e);
@@ -252,7 +252,7 @@ public class TreeOperationsMainModel {
             try (PreparedStatement ps = model.getConnection().prepareStatement(req)){
                 ps.execute();
                 item.getParent().getChildren().remove(item);
-                controller.logRequestTextArea.appendText(req);
+                controller.getLogRequestTextArea().appendText(req);
                 FLogger.request(req);
                 showSuccessDeleting(item);
             } catch (SQLException e) {
@@ -283,7 +283,7 @@ public class TreeOperationsMainModel {
             ((Stage)successDeletion.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
             successDeletion.show();
 
-            controller.logRequestTextArea.appendText(request);
+            controller.getLogRequestTextArea().appendText(request);
             FLogger.request(request);
         } catch (SQLException e) {
             Alert errorRead=new Alert(Alert.AlertType.ERROR);
@@ -331,7 +331,7 @@ public class TreeOperationsMainModel {
                 item.getChildren().add(newProcedure);
                 showSuccessAdding(newProcedure);
                 FLogger.request(request);
-                controller.logRequestTextArea.appendText(request);
+                controller.getLogRequestTextArea().appendText(request);
             } catch (SQLException e) {
                 showErrorAdding(newProcedure, e);
                 FLogger.error("Ошибка при создании процедуры " + newProcedure.getValue().getName(), e);
@@ -432,7 +432,7 @@ public class TreeOperationsMainModel {
                     }
                     showResultDialog(resultsValues,results);
                 }
-                controller.logRequestTextArea.appendText(request.toString());
+                controller.getLogRequestTextArea().appendText(request.toString());
                 FLogger.request(request.toString());
                 Alert alert=new Alert(Alert.AlertType.INFORMATION);
                 alert.setTitle("Процедура успешно выполнена");

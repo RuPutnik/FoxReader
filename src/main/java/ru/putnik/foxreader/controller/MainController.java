@@ -46,11 +46,11 @@ public class MainController extends Application implements Initializable {
     @FXML
     private Menu timeMenu;
     @FXML
-    public TreeView<TypeTreeElement> treeDBTreeView;
+    private TreeView<TypeTreeElement> treeDBTreeView;
     @FXML
-    public TextArea logRequestTextArea;
+    private TextArea logRequestTextArea;
     @FXML
-    public TableView<List<String>> tableDBTableView;
+    private TableView<List<String>> tableDBTableView;
     @FXML
     private CheckBox modeRealSQLCheckBox;
     @FXML
@@ -489,5 +489,17 @@ public class MainController extends Application implements Initializable {
 
     public GridPane getRowGridPane() {
         return rowGridPane;
+    }
+
+    public TextArea getLogRequestTextArea() {
+        return logRequestTextArea;
+    }
+
+    public TreeView<TypeTreeElement> getTreeDBTreeView() {
+        return treeDBTreeView;
+    }
+
+    public TableView<List<String>> getTableDBTableView() {
+        return tableDBTableView;
     }
 }
