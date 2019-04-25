@@ -528,26 +528,27 @@ public class MainModel {
     private void addingKeys(TreeItem<TypeTreeElement> keysItem){
         try {
             ResultSet set=connection.getMetaData().getExportedKeys(keysItem.getValue().getNameDB(),keysItem.getValue().getSchema(),keysItem.getValue().getNameTable());
-            String namePrimaryKey="";
-            String nameForeignKey="";
+            String namePrimaryKey;
+            String nameForeignKey;
+            ResultSet set1=connection.getMetaData().getPrimaryKeys(keysItem.getValue().getNameDB(),keysItem.getValue().getSchema(),keysItem.getValue().getNameTable());
 
+            while (set1.next()) {
+                namePrimaryKey = set1.getString("PK_NAME");
+
+                TreeItem<TypeTreeElement> primaryKey = new TreeItem<>();
+                primaryKey.setValue(new TypeTreeElement(Type.PRIMARY_KEY, namePrimaryKey, keysItem.getValue().getNameDB(), keysItem.getValue().getNameTable(), ""));
+                primaryKey.setGraphic(new ImageView(ImageLoader.getPrimaryKey()));
+                keysItem.getChildren().add(primaryKey);
+            }
             while (set.next()){
-
-                if(namePrimaryKey.equals("")){
-                    namePrimaryKey=namePrimaryKey+set.getString("PK_NAME");
-
-                    TreeItem<TypeTreeElement> primaryKey = new TreeItem<>();
-                    primaryKey.setValue(new TypeTreeElement(Type.PRIMARY_KEY, namePrimaryKey, keysItem.getValue().getNameDB(),keysItem.getValue().getNameTable(), ""));
-                    primaryKey.setGraphic(new ImageView(ImageLoader.getPrimaryKey()));
-                    keysItem.getChildren().add(primaryKey);
-                }
-                nameForeignKey=nameForeignKey+set.getString("FK_NAME");
+                nameForeignKey=set.getString("FK_NAME");
                 TreeItem<TypeTreeElement> foreignKey=new TreeItem<>();
                 foreignKey.setValue(new TypeTreeElement(Type.FOREIGN_KEY,nameForeignKey,keysItem.getValue().getNameDB(),keysItem.getValue().getNameTable(),""));
                 foreignKey.setGraphic(new ImageView(ImageLoader.getForeignKey()));
                 keysItem.getChildren().add(foreignKey);
             }
             set.close();
+            set1.close();
         } catch (SQLException e) {
             e.printStackTrace();
             error("Ошибка при добавлении ключей в дерево ",e);

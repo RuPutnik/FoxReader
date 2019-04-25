@@ -22,8 +22,6 @@ import ru.putnik.foxreader.controller.MainController;
 
 import java.sql.*;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
 import static ru.putnik.foxreader.FLogger.*;
@@ -163,11 +161,11 @@ public class TreeOperationsMainModel {
         Optional<ButtonType> optional = addingTable.showAndWait();
 
         if (optional.get() == ButtonType.OK) {
-            request=request+nameColumn.getText();
-            request=createAddTableRequest(request,names,types,notNulles,nameColumnKey.getText());
+            request=request+name.getText();
+            request=createAddTableRequest(request,names,types,notNulles,nameColumnKey.getText().trim());
             TreeItem<TypeTreeElement> newTable = new TreeItem<>();
             try {
-                newTable.setValue(new TypeTreeElement(TypeTreeElement.Type.TABLE, name.getText(), item.getValue().getNameDB(), name.getText(), "dbo"));
+                newTable.setValue(new TypeTreeElement(TypeTreeElement.Type.TABLE, name.getText().trim(), item.getValue().getNameDB(), name.getText().trim(), "dbo"));
                 newTable.setGraphic(new ImageView(ImageLoader.getTable()));
                 if (name.getText().equals("")) {
                     throw new SQLException("Не указано имя новой таблицы");
@@ -197,7 +195,7 @@ public class TreeOperationsMainModel {
             if(!names.get(n).getText().trim().equals("")&&!types.get(n).getSelectionModel().getSelectedItem().toString().equals("Тип данных")){
                 builder.append(names.get(n).getText()).append(" ").append(types.get(n).getSelectionModel().getSelectedItem().toString());
                 if(names.get(n).getText().trim().equals(primaryKeyName)){
-                    builder.append(" PRIMARY KEY");
+                    builder.append(" CONSTRAINT PK_").append(names.get(n).getText()).append(" PRIMARY KEY");
                 }
                 if(notNull.get(n).isSelected()) {
                     builder.append(" NOT NULL");

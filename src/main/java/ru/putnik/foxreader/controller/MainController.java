@@ -124,6 +124,7 @@ public class MainController extends Application implements Initializable {
             if (property != null) {
                 try {
                     mainModel.initializeConnection(property);
+                    mainModel.fillTree();
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
                     alert.setTitle("Подключение установлено");
                     alert.setHeaderText("Подключение к серверу выполнено успешно!");
@@ -131,8 +132,6 @@ public class MainController extends Application implements Initializable {
                     ((Stage)alert.getDialogPane().getScene().getWindow()).getIcons().add(new Image("icons/foxIcon.png"));
                     alert.show();
                     logRequestTextArea.appendText("Success connection: " + property.createConnectionUrl() + "\n");
-
-                    mainModel.fillTree();
 
                     operationsMainModel=new TreeOperationsMainModel(this,mainModel);
 
