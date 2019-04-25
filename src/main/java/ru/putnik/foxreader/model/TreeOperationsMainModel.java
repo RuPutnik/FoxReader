@@ -269,7 +269,7 @@ public class TreeOperationsMainModel {
             ResultSet procedureCode=ps.executeQuery();
             StringBuilder code=new StringBuilder();
             while (procedureCode.next()){
-                code.append(procedureCode.getString(1)).append("\n");
+                code.append(procedureCode.getString(1));
             }
             Alert successDeletion=new Alert(Alert.AlertType.INFORMATION);
             successDeletion.setTitle("Просмотр процедуры "+item.getValue().getName());
